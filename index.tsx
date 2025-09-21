@@ -44,7 +44,7 @@ const About = () => (
     <h2 className="section-title">個人簡介</h2>
     <div className="about-card">
       <div className="about-intro">
-        <div className="profile-pic-placeholder" aria-label="David's profile picture"></div>
+        <img src="https://gmnfuedutw-my.sharepoint.com/:i:/g/personal/40248138_gm_nfu_edu_tw/EX8c3mj7JdFAhYK4QTRblH0BNxUNyl0pPVU78mpTQKxO5Q?e=5YQVSi&download=1" alt="David Lee's profile picture" className="profile-pic" />
         <h3>李承</h3>
         <div className="contact-info">
           <p>📞 0903646800</p>
