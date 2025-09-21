@@ -177,7 +177,6 @@ interface PortfolioData {
 const Portfolio = () => {
     const [modalVideoUrl, setModalVideoUrl] = useState(null);
     const [portfolioData, setPortfolioData] = useState<PortfolioData | null>(null);
-    const fileInputRef = useRef(null);
 
     useEffect(() => {
         // Load initial data
@@ -206,43 +205,6 @@ const Portfolio = () => {
         setModalVideoUrl(null);
     };
 
-    const handleExport = () => {
-        if (!portfolioData) return;
-        const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(
-            JSON.stringify(portfolioData, null, 2)
-        )}`;
-        const link = document.createElement("a");
-        link.href = jsonString;
-        link.download = "portfolio-data.json";
-        link.click();
-    };
-    
-    const handleImportClick = () => {
-        fileInputRef.current.click();
-    };
-
-    const handleFileChange = (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                // FIX: Check if `e.target.result` is a string before parsing to avoid type errors.
-                if (e.target && typeof e.target.result === 'string') {
-                    const json = JSON.parse(e.target.result);
-                    // Basic validation can be added here
-                    setPortfolioData(json);
-                }
-            } catch (error) {
-                console.error("Error parsing JSON file:", error);
-                alert("無法讀取檔案。請確認檔案格式為正確的 JSON。");
-            }
-        };
-        reader.readAsText(file);
-    };
-
-
     if (!portfolioData) {
         return (
             <section id="portfolio" className="section">
@@ -256,15 +218,15 @@ const Portfolio = () => {
         <section id="portfolio" className="section">
             <h2 className="section-title">作品集</h2>
             <div className="portfolio-controls">
-                <input
-                    type="file"
-                    accept=".json"
-                    ref={fileInputRef}
-                    onChange={handleFileChange}
-                    style={{ display: 'none' }}
-                />
-                <button className="portfolio-btn" onClick={handleImportClick}>匯入作品集 (JSON)</button>
-                <button className="portfolio-btn" onClick={handleExport}>下載作品集 (JSON)</button>
+                <a 
+                    href="https://gmnfuedutw-my.sharepoint.com/:b:/g/personal/40248138_gm_nfu_edu_tw/ER4bxtqq1lVDlaHKxP7fxTYB1gKolSedjOK-Iwt1culJLg?e=aWdT7V" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="portfolio-btn" 
+                    role="button"
+                >
+                    查看完整履歷 (PDF)
+                </a>
             </div>
             {Object.entries(portfolioData).map(([category, items]) => (
                 <div key={category} className="portfolio-category">
