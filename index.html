@@ -288,11 +288,11 @@ main {
 /* --- Portfolio Section --- */
 .portfolio-controls {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
   gap: 1rem;
   margin-bottom: 3rem;
   margin-top: -1rem;
-  flex-wrap: wrap;
 }
 
 .portfolio-btn {
@@ -583,67 +583,42 @@ main {
     border: none;
 }
 
-/* --- Image Modal --- */
-.image-modal-overlay {
-    position: fixed;
+/* --- Image Slideshow --- */
+.slideshow-container {
+    position: relative;
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    background: var(--card-background);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    user-select: none;
+}
+
+.slideshow-image-wrapper {
+    position: relative;
+    width: 100%;
+    padding-top: 56.25%; /* 16:9 Aspect Ratio */
+}
+
+.slideshow-image {
+    position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.9);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 3000;
-    animation: fadeIn 0.3s ease;
-}
-
-.image-modal-content {
-    position: relative;
-    width: 95%;
-    height: 95%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.image-modal-close {
-    position: absolute;
-    top: 1rem;
-    right: 1.5rem;
-    background: transparent;
-    border: none;
-    color: #fff;
-    font-size: 3rem;
-    cursor: pointer;
-    line-height: 1;
-    padding: 0;
-    z-index: 3002;
-    transition: color 0.3s;
-}
-.image-modal-close:hover {
-    color: var(--accent-color);
-}
-
-.image-modal-image-wrapper {
-    max-width: 100%;
-    max-height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.image-modal-image {
-    max-width: 100%;
-    max-height: 100%;
     object-fit: contain;
-    border-radius: 5px;
-    box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+    background-color: #000;
+    animation: fadeInImage 0.5s ease-in-out;
 }
 
-.image-modal-nav {
+@keyframes fadeInImage {
+    from { opacity: 0.3; }
+    to { opacity: 1; }
+}
+
+.slideshow-nav {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
@@ -651,29 +626,28 @@ main {
     color: #fff;
     border: 1px solid var(--border-color);
     border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    font-size: 2rem;
+    width: 45px;
+    height: 45px;
+    font-size: 1.8rem;
     cursor: pointer;
-    z-index: 3001;
+    z-index: 10;
     display: flex;
     justify-content: center;
     align-items: center;
     transition: background-color 0.3s, color 0.3s;
-    user-select: none;
 }
-.image-modal-nav:hover {
+.slideshow-nav:hover {
     background: var(--accent-color);
     color: var(--background-color);
 }
-.image-modal-nav.prev {
-    left: 1rem;
+.slideshow-nav.prev {
+    left: 1.5rem;
 }
-.image-modal-nav.next {
-    right: 1rem;
+.slideshow-nav.next {
+    right: 1.5rem;
 }
 
-.image-modal-counter {
+.slideshow-counter {
     position: absolute;
     bottom: 1rem;
     left: 50%;
@@ -683,8 +657,9 @@ main {
     border-radius: 5px;
     color: var(--primary-text-color);
     font-size: 1rem;
-    z-index: 3001;
+    z-index: 10;
 }
+
 
 /* --- Footer --- */
 .app-footer {
@@ -740,14 +715,13 @@ main {
 }
 
 @media (max-width: 768px) {
-    .image-modal-nav {
-        width: 40px;
-        height: 40px;
-        font-size: 1.5rem;
+    .slideshow-nav {
+        width: 35px;
+        height: 35px;
+        font-size: 1.4rem;
     }
-    .image-modal-nav.prev { left: 5px; }
-    .image-modal-nav.next { right: 5px; }
-    .image-modal-close { top: 5px; right: 10px; font-size: 2.5rem;}
+    .slideshow-nav.prev { left: 1rem; }
+    .slideshow-nav.next { right: 1rem; }
 }
 
 @media (max-width: 600px) {
@@ -760,7 +734,7 @@ main {
 <body>
     <div id="root"></div>
     <script type="text/babel" data-type="module">
-        import React, { useState, useEffect, useRef } from 'react';
+        import React, { useState, useEffect, useRef, useCallback } from 'react';
         import { createRoot } from 'react-dom/client';
 
         const Header = () => (
@@ -874,46 +848,47 @@ main {
             );
         };
         
-        const ImageModal = ({ images, currentIndex, onClose, onNext, onPrev }) => {
-            if (!images || images.length === 0) return null;
+        const ImageSlideshow = ({ images }) => {
+            const [currentIndex, setCurrentIndex] = useState(0);
+
+            const goToPrevious = useCallback(() => {
+                setCurrentIndex(prevIndex => (prevIndex === 0 ? images.length - 1 : prevIndex - 1));
+            }, [images.length]);
+
+            const goToNext = useCallback(() => {
+                setCurrentIndex(prevIndex => (prevIndex === images.length - 1 ? 0 : prevIndex + 1));
+            }, [images.length]);
 
             useEffect(() => {
                 const handleKeyDown = (e) => {
-                    if (e.key === 'Escape') onClose();
-                    if (e.key === 'ArrowRight') onNext();
-                    if (e.key === 'ArrowLeft') onPrev();
+                    if (e.key === 'ArrowRight') {
+                        goToNext();
+                    } else if (e.key === 'ArrowLeft') {
+                        goToPrevious();
+                    }
                 };
                 window.addEventListener('keydown', handleKeyDown);
-                return () => window.removeEventListener('keydown', handleKeyDown);
-            }, [onClose, onNext, onPrev]);
+                return () => {
+                    window.removeEventListener('keydown', handleKeyDown);
+                };
+            }, [goToNext, goToPrevious]);
 
-            const handleNextClick = (e) => {
-                e.stopPropagation();
-                onNext();
-            };
-
-            const handlePrevClick = (e) => {
-                e.stopPropagation();
-                onPrev();
-            };
+            if (!images || images.length === 0) return null;
 
             return (
-                <div className="image-modal-overlay" onClick={onClose}>
-                    <div className="image-modal-content" onClick={(e) => e.stopPropagation()}>
-                        <button className="image-modal-close" onClick={onClose} aria-label="Close image viewer">&times;</button>
-                        <button className="image-modal-nav prev" onClick={handlePrevClick} aria-label="Previous image">&#10094;</button>
-                        <div className="image-modal-image-wrapper">
-                            <img src={images[currentIndex]} alt={`Portfolio image ${currentIndex + 1}`} className="image-modal-image" />
-                        </div>
-                        <button className="image-modal-nav next" onClick={handleNextClick} aria-label="Next image">&#10095;</button>
-                        <div className="image-modal-counter">{`${currentIndex + 1} / ${images.length}`}</div>
+                <div className="slideshow-container">
+                    <button className="slideshow-nav prev" onClick={goToPrevious} aria-label="Previous image">&#10094;</button>
+                    <div className="slideshow-image-wrapper">
+                         <img key={currentIndex} src={images[currentIndex]} alt={`Portfolio image ${currentIndex + 1}`} className="slideshow-image" />
                     </div>
+                    <button className="slideshow-nav next" onClick={goToNext} aria-label="Next image">&#10095;</button>
+                    <div className="slideshow-counter">{`${currentIndex + 1} / ${images.length}`}</div>
                 </div>
             );
         };
 
 
-        const PortfolioItem = ({ item, onVideoClick, onImageClick, isGallery }) => {
+        const PortfolioItem = ({ item, onVideoClick }) => {
             const isVideo = !!item.videoUrl;
             const isLink = !!item.linkUrl;
 
@@ -922,8 +897,6 @@ main {
                     onVideoClick(item.videoUrl);
                 } else if (isLink) {
                     window.open(item.linkUrl, '_blank', 'noopener,noreferrer');
-                } else if (isGallery) {
-                    onImageClick();
                 }
             };
             
@@ -954,8 +927,6 @@ main {
                             <div className="play-icon" aria-hidden="true"></div>
                         ) : isLink ? (
                             <div className="link-icon" aria-hidden="true"></div>
-                        ) : isGallery ? (
-                            <div className="gallery-icon" aria-hidden="true"></div>
                         ) : null}
                     </div>
                     <h4 className="portfolio-item-title">{item.title}</h4>
@@ -1058,7 +1029,6 @@ main {
 
         const Portfolio = () => {
             const [modalVideoUrl, setModalVideoUrl] = useState(null);
-            const [imageModal, setImageModal] = useState({ isOpen: false, images: [], currentIndex: 0 });
             
             const galleryImageUrls = [
                 "https://gmnfuedutw-my.sharepoint.com/:i:/g/personal/40248138_gm_nfu_edu_tw/EZ8J6hpG_Y9PmA978XcjjxMBd-dzXawqVsoPUeS-i2ZkDA?e=EWE7Rw&download=1",
@@ -1067,8 +1037,8 @@ main {
                 "https://gmnfuedutw-my.sharepoint.com/:i:/g/personal/40248138_gm_nfu_edu_tw/EY7hVPo_RLBInL1hXtdA7cgBKG6_V71TCSnxpiJ7M5j6pQ?e=QnkBcc&download=1",
                 "https://gmnfuedutw-my.sharepoint.com/:i:/g/personal/40248138_gm_nfu_edu_tw/EajWUPx9D49NtmN3yyYrkugBKdkDrX7FdRW16_vzpiYvMw?e=e4OiM1&download=1",
                 "https://gmnfuedutw-my.sharepoint.com/:i:/g/personal/40248138_gm_nfu_edu_tw/EV2t8q3lf4pBrc5NluUD4vsB9twrwIxJgJFax7kCWEuGTA?e=84pbC4&download=1",
-                "https://gmnfuedutw-my.sharepoint.com/:i:/g/personal/40248138_gm_nfu_edu_tw/EV2t8q3lf4pBrc5NluUD4vsB9twrwIxJgJFax7kCWEuGTA?e=eGiJ4O&download=1",
-                "https://gmnfuedutw-my.sharepoint.com/:i:/g/personal/40248138_gm_nfu_edu_tw/EScQbWLjYHVCnp4tr6QUdUkBPgbA8xoHmrgYOOb0XKERvQ?e=TNUU2h&download=1",
+                "https://gmnfuedutw-my.sharepoint.com/:i:/g/personal/40248138_gm_nfu_edu_tw/ESxVSOWOytZCqmabqPnEU-gBpTK1K5t9YOOUGOA0fWHtow?e=PxCHtF&download=1",
+                "https://gmnfuedutw-my.sharepoint.com/:i:/g/personal/40248138_gm_nfu_edu_tw/EQfhWdY30bdNlPxKg2YsxGABOLztjzBXrrv2dFbRMWaT7w?e=qjHrRl&download=1",
                 "https://gmnfuedutw-my.sharepoint.com/:i:/g/personal/40248138_gm_nfu_edu_tw/EScQbWLjYHVCnp4tr6QUdUkBPgbA8xoHmrgYOOb0XKERvQ?e=hIuQ5y&download=1",
                 "https://gmnfuedutw-my.sharepoint.com/:i:/g/personal/40248138_gm_nfu_edu_tw/EWKM1vh9zrpNsTFqmrnrdvIBzPTj5o_ozAdhLixniVsByA?e=IhwpUI&download=1",
                 "https://gmnfuedutw-my.sharepoint.com/:i:/g/personal/40248138_gm_nfu_edu_tw/ESf80rpbCnxEtRU9kIQj3BgB-0A-QBZ23P7Yau8opJTFiA?e=1WxqgW&download=1",
@@ -1095,29 +1065,10 @@ main {
                 setModalVideoUrl(null);
             };
             
-            const openImageModal = (images, index) => {
-                setImageModal({ isOpen: true, images: images, currentIndex: index });
-            };
-            const closeImageModal = () => {
-                setImageModal(prev => ({ ...prev, isOpen: false }));
-            };
-            const showNextImage = () => {
-                setImageModal(prev => ({ ...prev, currentIndex: (prev.currentIndex + 1) % prev.images.length }));
-            };
-            const showPrevImage = () => {
-                setImageModal(prev => ({ ...prev, currentIndex: (prev.currentIndex - 1 + prev.images.length) % prev.images.length }));
-            };
-
             return (
                 <section id="portfolio" className="section">
                     <h2 className="section-title">作品集</h2>
                     <div className="portfolio-controls">
-                         <button 
-                            className="portfolio-btn" 
-                            onClick={() => openImageModal(galleryImageUrls, 0)}
-                         >
-                            作品畫廊
-                        </button>
                         <a 
                             href="https://gmnfuedutw-my.sharepoint.com/:b:/g/personal/40248138_gm_nfu_edu_tw/ER4bxtqq1lVDlaHKxP7fxTYB1gKolSedjOK-Iwt1culJLg?e=aWdT7V" 
                             target="_blank" 
@@ -1128,11 +1079,15 @@ main {
                             查看完整履歷 (PDF)
                         </a>
                     </div>
+                     <div className="portfolio-category">
+                        <h3 className="portfolio-category-title">作品畫廊</h3>
+                        <ImageSlideshow images={galleryImageUrls} />
+                    </div>
                     {Object.entries(portfolioData).map(([category, items]) => (
                         <div key={category} className="portfolio-category">
                             <h3 className="portfolio-category-title">{category}</h3>
                              <div className={`portfolio-grid ${category !== 'Unreal' ? 'portfolio-grid-3-col' : ''}`}>
-                                {items.map((item, index) => (
+                                {items.map((item) => (
                                     <PortfolioItem 
                                       key={item.id} 
                                       item={item} 
@@ -1143,15 +1098,6 @@ main {
                         </div>
                     ))}
                     <VideoModal videoUrl={modalVideoUrl} onClose={closeVideoModal} />
-                    {imageModal.isOpen && (
-                        <ImageModal 
-                            images={imageModal.images}
-                            currentIndex={imageModal.currentIndex}
-                            onClose={closeImageModal}
-                            onNext={showNextImage}
-                            onPrev={showPrevImage}
-                        />
-                    )}
                 </section>
             );
         };
