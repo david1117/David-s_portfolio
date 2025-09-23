@@ -1,5 +1,4 @@
-// FIX: Error on line 1: Cannot find name 'React'. Import React and hooks.
-// FIX: Error on line 376: Cannot find name 'ReactDOM'. Import ReactDOM.
+// Fix: Import React and ReactDOM to resolve 'Cannot find name' errors for React and ReactDOM.
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import ReactDOM from 'react-dom/client';
 
@@ -58,14 +57,14 @@ const Header = () => {
 
 
 const Hero = () => {
-    const textRef = useRef(null);
+    const textRef = useRef<SVGTextElement>(null);
     
     useEffect(() => {
         const textElement = textRef.current;
         if (textElement) {
             const pathLength = textElement.getComputedTextLength();
-            textElement.style.strokeDasharray = pathLength;
-            textElement.style.strokeDashoffset = pathLength;
+            textElement.style.strokeDasharray = pathLength.toString();
+            textElement.style.strokeDashoffset = pathLength.toString();
             textElement.classList.add('animate');
         }
     }, []);
@@ -151,7 +150,8 @@ const About = () => (
   </section>
 );
 
-const VideoModal = ({ videoUrl, onClose }) => {
+// Fix: Add explicit types for component props to prevent type errors.
+const VideoModal = ({ videoUrl, onClose }: { videoUrl: string | null; onClose: () => void; }) => {
     if (!videoUrl) return null;
 
     return (
@@ -172,7 +172,8 @@ const VideoModal = ({ videoUrl, onClose }) => {
     );
 };
 
-const ImageSlideshow = ({ images }) => {
+// Fix: Add explicit type for 'images' prop.
+const ImageSlideshow = ({ images }: { images: string[] }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
 
     const goToPrevious = useCallback(() => {
@@ -184,7 +185,7 @@ const ImageSlideshow = ({ images }) => {
     }, [images.length]);
 
     useEffect(() => {
-        const handleKeyDown = (e) => {
+        const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'ArrowRight') {
                 goToNext();
             } else if (e.key === 'ArrowLeft') {
@@ -211,20 +212,40 @@ const ImageSlideshow = ({ images }) => {
     );
 };
 
+// Fix: Define interfaces for portfolio data structure to ensure type safety throughout the component.
+interface PortfolioItemType {
+  id: number | string;
+  title: string;
+  videoUrl?: string;
+  linkUrl?: string;
+  imageUrl?: string;
+  placeholder?: boolean;
+}
 
-const PortfolioItem = ({ item, onVideoClick }) => {
+interface PortfolioData {
+  [category: string]: PortfolioItemType[];
+}
+
+interface PortfolioItemProps {
+  item: PortfolioItemType;
+  onVideoClick: (videoUrl: string) => void;
+}
+
+
+// Fix: Add explicit types for component props.
+const PortfolioItem = ({ item, onVideoClick }: PortfolioItemProps) => {
     const isVideo = !!item.videoUrl;
     const isLink = !!item.linkUrl;
 
     const handleClick = () => {
-        if (isVideo) {
+        if (isVideo && item.videoUrl) {
             onVideoClick(item.videoUrl);
         } else if (isLink) {
             window.open(item.linkUrl, '_blank', 'noopener,noreferrer');
         }
     };
     
-    const handleKeyPress = (event) => {
+    const handleKeyPress = (event: React.KeyboardEvent) => {
         if (event.key === 'Enter' || event.key === ' ') {
             handleClick();
         }
@@ -233,8 +254,8 @@ const PortfolioItem = ({ item, onVideoClick }) => {
     return (
         <div 
           className={`portfolio-item ${item.placeholder ? 'placeholder' : ''}`}
-          onClick={item.placeholder ? null : handleClick}
-          onKeyPress={item.placeholder ? null : handleKeyPress}
+          onClick={item.placeholder ? undefined : handleClick}
+          onKeyPress={item.placeholder ? undefined : handleKeyPress}
           tabIndex={item.placeholder ? -1 : 0}
           role="button"
           aria-label={`View project: ${item.title}`}
@@ -259,9 +280,8 @@ const PortfolioItem = ({ item, onVideoClick }) => {
 };
 
 const Portfolio = () => {
-    // FIX: Error on line 334: Property 'map' does not exist on type 'unknown'. Provide an explicit type for state.
-    // FIX: Error on line 336: Property 'key' does not exist on type '{...}'. This is a cascading error from the unknown type above. Typing the state resolves this.
-    const [portfolioData, setPortfolioData] = useState<any>(null);
+    // Fix: Use defined interfaces for state to fix 'unknown' type errors and enable type checking.
+    const [portfolioData, setPortfolioData] = useState<PortfolioData | null>(null);
     const [modalVideoUrl, setModalVideoUrl] = useState<string | null>(null);
     
     useEffect(() => {
@@ -292,7 +312,7 @@ const Portfolio = () => {
     ];
 
     useEffect(() => {
-        const handleEsc = (event) => {
+        const handleEsc = (event: KeyboardEvent) => {
            if (event.key === 'Escape') {
               closeVideoModal();
            }
@@ -303,7 +323,8 @@ const Portfolio = () => {
         };
     }, []);
 
-    const openVideoModal = (videoUrl) => {
+    // Fix: Add type for videoUrl parameter.
+    const openVideoModal = (videoUrl: string) => {
         setModalVideoUrl(videoUrl);
     };
 
@@ -332,11 +353,11 @@ const Portfolio = () => {
             {!portfolioData ? (
                 <p style={{textAlign: 'center'}}>Loading portfolio...</p>
             ) : (
-                Object.entries(portfolioData).map(([category, items]: [string, any]) => (
+                Object.entries(portfolioData).map(([category, items]) => (
                     <div key={category} className="portfolio-category">
                         <h3 className="portfolio-category-title">{category}</h3>
                          <div className={`portfolio-grid ${category !== 'Unreal' ? 'portfolio-grid-3-col' : ''}`}>
-                            {items.map((item: any) => (
+                            {items.map((item) => (
                                 <PortfolioItem 
                                   key={item.id} 
                                   item={item} 
@@ -366,7 +387,7 @@ const Footer = () => (
 
 
 const App = () => (
-    <>
+    <React.Fragment>
         <Header />
         <main>
             <Hero />
@@ -374,9 +395,12 @@ const App = () => (
             <Portfolio />
         </main>
         <Footer />
-    </>
+    </React.Fragment>
 );
 
+// Fix: Ensure the root container exists before rendering the app, fixing 'Cannot find name ReactDOM' error via import at top of file.
 const container = document.getElementById('root');
-const root = ReactDOM.createRoot(container);
-root.render(<App />);
+if (container) {
+    const root = ReactDOM.createRoot(container);
+    root.render(<App />);
+}
