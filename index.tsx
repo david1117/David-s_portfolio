@@ -1,4 +1,4 @@
-// Fix: Add imports for React and ReactDOM to resolve undefined errors. This makes React and its hooks available.
+// FIX: Import React, ReactDOM, and specific hooks to resolve issues with undefined variables and allow JSX syntax.
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import ReactDOM from 'react-dom/client';
 
