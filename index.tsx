@@ -1,6 +1,9 @@
-// Fix: Import React and ReactDOM to resolve 'Cannot find name' errors for React and ReactDOM.
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+// Fix: Import React and ReactDOM to resolve errors where they are used but not defined.
+import React from 'react';
 import ReactDOM from 'react-dom/client';
+
+// Use the globally available React object and destructure the necessary hooks.
+const { useState, useEffect, useRef, useCallback } = React;
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -292,7 +295,8 @@ const Portfolio = () => {
                 }
                 return res.json();
             })
-            .then(data => setPortfolioData(data))
+            // Fix: Explicitly type the fetched data to resolve 'unknown' type errors downstream.
+            .then((data: PortfolioData) => setPortfolioData(data))
             .catch(error => console.error('Error fetching portfolio data:', error));
     }, []);
 
@@ -398,7 +402,6 @@ const App = () => (
     </React.Fragment>
 );
 
-// Fix: Ensure the root container exists before rendering the app, fixing 'Cannot find name ReactDOM' error via import at top of file.
 const container = document.getElementById('root');
 if (container) {
     const root = ReactDOM.createRoot(container);
