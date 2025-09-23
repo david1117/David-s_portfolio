@@ -151,8 +151,9 @@ main {
   stroke: var(--accent-color);
   stroke-width: 1.5px;
   fill: transparent;
-  stroke-dasharray: 1500;
-  stroke-dashoffset: 1500;
+}
+
+.hero-title-text.animate {
   animation: 
     draw-line 3s ease-out forwards, 
     fill-in 1s ease-out 3s forwards,
@@ -747,30 +748,45 @@ main {
           </header>
         );
 
-        const Hero = () => (
-            <section id="home" className="hero">
-                <div className="hero-title-container">
-                    <svg className="hero-title-svg" viewBox="0 0 900 120">
-                        <text
-                            className="hero-title-text"
-                            x="50%"
-                            y="50%"
-                            dy=".35em"
-                            textAnchor="middle"
-                        >
-                            David's Portfolio
-                        </text>
-                    </svg>
-                </div>
-                <h2 className="hero-subtitle">李承 作品集</h2>
-                <a href="#about" className="scroll-down" aria-label="Scroll down">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="m9 12.75 3 3m0 0 3-3m-3 3v-7.5" />
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                    </svg>
-                </a>
-            </section>
-        );
+        const Hero = () => {
+            const textRef = useRef(null);
+            
+            useEffect(() => {
+                const textElement = textRef.current;
+                if (textElement) {
+                    const pathLength = textElement.getComputedTextLength();
+                    textElement.style.strokeDasharray = pathLength;
+                    textElement.style.strokeDashoffset = pathLength;
+                    textElement.classList.add('animate');
+                }
+            }, []);
+
+            return (
+                <section id="home" className="hero">
+                    <div className="hero-title-container">
+                        <svg className="hero-title-svg" viewBox="0 0 900 120">
+                            <text
+                                ref={textRef}
+                                className="hero-title-text"
+                                x="50%"
+                                y="50%"
+                                dy=".35em"
+                                textAnchor="middle"
+                            >
+                                David's Portfolio
+                            </text>
+                        </svg>
+                    </div>
+                    <h2 className="hero-subtitle">李承 作品集</h2>
+                    <a href="#about" className="scroll-down" aria-label="Scroll down">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="m9 12.75 3 3m0 0 3-3m-3 3v-7.5" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                        </svg>
+                    </a>
+                </section>
+            );
+        };
 
         const About = () => (
           <section id="about" className="section">
