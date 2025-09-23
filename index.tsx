@@ -1,4 +1,4 @@
-// FIX: Import React, ReactDOM, and specific hooks to resolve issues with undefined variables and allow JSX syntax.
+// Fix: Replaced triple-slash directives and manual destructuring with standard ES module imports for React and ReactDOM to resolve errors with undefined types and namespaces.
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import ReactDOM from 'react-dom/client';
 
