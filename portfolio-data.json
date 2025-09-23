@@ -4,37 +4,37 @@
       "id": 1,
       "title": "各式模型 (Models)",
       "linkUrl": "https://gmnfuedutw-my.sharepoint.com/my?id=%2Fpersonal%2F40248138%5Fgm%5Fnfu%5Fedu%5Ftw%2FDocuments%2FTop%2Dline%2F3D%20Model&viewid=075715f7%2Da2f3%2D42f8%2D84b8%2Df664e9994565",
-      "imageUrl": "./assets/3d-models.jpg"
+      "imageUrl": "/assets/3d-models.jpg"
     },
     {
       "id": 2,
       "title": "各式場景 (Scenes)",
       "linkUrl": "https://gmnfuedutw-my.sharepoint.com/:f:/g/personal/40248138_gm_nfu_edu_tw/Esx73vdiREZGn6mHr0zSt7YBgrDW8F4OWwdpyMvcjDyAyQ?e=fbHEbi",
-      "imageUrl": "./assets/3d-scenes.jpg"
+      "imageUrl": "/assets/3d-scenes.jpg"
     },
     {
       "id": 3,
       "title": "各式組裝 (Assemblies)",
       "linkUrl": "https://gmnfuedutw-my.sharepoint.com/:f:/g/personal/40248138_gm_nfu_edu_tw/EgQzLYLsmjFCgagsZ-4NR50BsvGop2Z46YYNBdVnaM4ncg?e=DcQi11",
-      "imageUrl": "./assets/3d-assemblies.jpg"
+      "imageUrl": "/assets/3d-assemblies.jpg"
     },
     {
       "id": 10,
       "title": "相片建模 (Photogrammetry)",
       "videoUrl": "https://www.youtube.com/embed/A4SjFe8iGOU",
-      "imageUrl": "./assets/3d-photogrammetry.jpg"
+      "imageUrl": "/assets/3d-photogrammetry.jpg"
     },
     {
       "id": 11,
       "title": "3D廣告 (3D Advertisement)",
       "videoUrl": "https://www.youtube.com/embed/44Nn3DWmbRM",
-      "imageUrl": "./assets/3d-advertisement.jpg"
+      "imageUrl": "/assets/3d-advertisement.jpg"
     },
     {
       "id": 12,
       "title": "場景展示2 (Scene Showcase 2)",
       "videoUrl": "https://www.youtube.com/embed/_16yoH_IalI",
-      "imageUrl": "./assets/3d-scene-showcase-2.jpg"
+      "imageUrl": "/assets/3d-scene-showcase-2.jpg"
     }
   ],
   "Unreal": [
@@ -42,37 +42,37 @@
       "id": 13,
       "title": "虛擬網站 (Virtual Website)",
       "videoUrl": "https://www.youtube.com/embed/SmUZq6l9UNE",
-      "imageUrl": "./assets/unreal-virtual-website.jpg"
+      "imageUrl": "/assets/unreal-virtual-website.jpg"
     },
     {
       "id": 14,
       "title": "全國電子 (E-Life Mall)",
       "videoUrl": "https://www.youtube.com/embed/wUBZycFWKIU",
-      "imageUrl": "./assets/unreal-elife-mall.jpg"
+      "imageUrl": "/assets/unreal-elife-mall.jpg"
     },
     {
       "id": 15,
       "title": "廣告製作 (Advertisement Production)",
       "videoUrl": "https://www.youtube.com/embed/jx-uK9CmeQU",
-      "imageUrl": "./assets/unreal-advertisement.jpg"
+      "imageUrl": "/assets/unreal-advertisement.jpg"
     },
     {
       "id": 16,
       "title": "VR製作 (VR Production)",
       "videoUrl": "https://www.youtube.com/embed/61JqRrlYkHM",
-      "imageUrl": "./assets/unreal-vr.jpg"
+      "imageUrl": "/assets/unreal-vr.jpg"
     },
     {
       "id": 17,
       "title": "電影製作 (Film Production)",
       "videoUrl": "https://www.youtube.com/embed/kOXa8ZnMKb8",
-      "imageUrl": "./assets/unreal-film.jpg"
+      "imageUrl": "/assets/unreal-film.jpg"
     },
     {
       "id": 18,
       "title": "VP展示 (VP Showcase)",
       "videoUrl": "https://www.youtube.com/embed/mGnytWgkM04",
-      "imageUrl": "./assets/unreal-vp-showcase.jpg"
+      "imageUrl": "/assets/unreal-vp-showcase.jpg"
     }
   ],
   "AI & 程式": [
@@ -80,19 +80,19 @@
       "id": 7,
       "title": "LS_Designer",
       "linkUrl": "https://ls-designer.vercel.app/",
-      "imageUrl": "./assets/ai-ls-designer.jpg"
+      "imageUrl": "/assets/ai-ls-designer.jpg"
     },
     {
       "id": 8,
       "title": "Google Sheets 圖片生成器",
       "linkUrl": "https://huggingface.co/spaces/davidlee831117/AutoLS_2",
-      "imageUrl": "./assets/ai-google-sheets-generator.jpg"
+      "imageUrl": "/assets/ai-google-sheets-generator.jpg"
     },
     {
       "id": 9,
       "title": "各式AI",
       "linkUrl": "https://gmnfuedutw-my.sharepoint.com/:f:/g/personal/40248138_gm_nfu_edu_tw/EuJGZHmPO51JuBHiTXtB2k4BZTUDBbT36S19TouYS3Hi0Q?e=DCDMsI",
-      "imageUrl": "./assets/ai-various.jpg"
+      "imageUrl": "/assets/ai-various.jpg"
     }
   ]
 }

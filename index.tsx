@@ -109,7 +109,7 @@ const About = () => (
     <h2 className="section-title">個人簡介</h2>
     <div className="about-card">
       <div className="about-intro">
-        <img src="./assets/profile-pic.jpg" alt="David Lee's profile picture" className="profile-pic" />
+        <img src="/assets/profile-pic.jpg" alt="David Lee's profile picture" className="profile-pic" />
         <h3>李承</h3>
         <div className="contact-info">
           <p>📞 0903646800</p>
@@ -151,7 +151,7 @@ const About = () => (
           <h4>自傳</h4>
           <p>我是一名熱愛 3D技術、虛擬製作與AI創作 的 3D Artist，具備七年豐富經驗。我致力於不斷提升技能與知識，並在多個專案中累積了寶貴成果。</p>
           <p>我的核心技能涵蓋 3DMAX（動畫、建模、VRAY 材質渲染、TyFlow）、BLENDER（動畫、建模、GeometryNode）及 Substance Painter（PBR 貼圖製作）。我精通 Unreal 引擎的 blueprint 與 Lumen 環境烘焙，能將精緻虛擬場景導入 Virtual Production 虛擬 LED 棚進行實務拍攝。在專案上，我曾為客戶製作擬真 3D 家具與組裝動畫，並參與 IN3D 虛擬購物網站與全國電子虛擬購物網站的 VR 互動製作，透過 Blueprint 大幅提升效率。製片廠的經驗也讓我具備與導演、攝影師等協作的能力，確保虛擬環境與真實拍攝完美融合。</p>
-          <p>近年來，我也積極探索 AI 繪圖與影片生成技術，擁有從 Stable Diffusion 到 ComfyUI 再到 nano banana 的實戰經驗，並能運用 wan2.2、Kling AI 等工具進行影片生成。我具備基礎程式能力，並能運用 Google AI Studio、Cursor、Copilot 等 AI 輔助工具開發 App DEMO，將 AI 應用於更多元的創作領域。</p>
+          <p>近年來，我也積極探索 AI 繪圖與影片生成技術，擁有從 Stable Diffusion 到 ComfyUI 再到 nano banana 的實戰經驗，并能運用 wan2.2、Kling AI 等工具進行影片生成。我具備基礎程式能力，並能運用 Google AI Studio、Cursor、Copilot 等 AI 輔助工具開發 App DEMO，將 AI 應用於更多元的創作領域。</p>
         </div>
       </div>
     </div>
@@ -258,7 +258,7 @@ const Portfolio = () => {
     const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
 
     useEffect(() => {
-      fetch('./portfolio-data.json')
+      fetch('/portfolio-data.json')
         .then(response => response.json())
         .then(data => setPortfolioData(data))
         .catch(error => console.error("Error fetching portfolio data:", error));
