@@ -1,9 +1,20 @@
-// Fix: Import React and ReactDOM to resolve errors where they are used but not defined.
-import React from 'react';
+// FIX: Import React and ReactDOM to resolve 'Cannot find name' errors.
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import ReactDOM from 'react-dom/client';
 
-// Use the globally available React object and destructure the necessary hooks.
-const { useState, useEffect, useRef, useCallback } = React;
+// FIX: Define interfaces for portfolio data to ensure type safety.
+interface PortfolioItemData {
+  id: number | string;
+  title: string;
+  videoUrl?: string;
+  linkUrl?: string;
+  images?: string[];
+  imageUrl?: string;
+}
+
+interface PortfolioData {
+  [category: string]: PortfolioItemData[];
+}
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -60,6 +71,7 @@ const Header = () => {
 
 
 const Hero = () => {
+    // FIX: Add type for useRef to improve type safety.
     const textRef = useRef<SVGTextElement>(null);
     
     useEffect(() => {
@@ -153,7 +165,7 @@ const About = () => (
   </section>
 );
 
-// Fix: Add explicit types for component props to prevent type errors.
+// FIX: Add type annotations for component props.
 const VideoModal = ({ videoUrl, onClose }: { videoUrl: string | null; onClose: () => void; }) => {
     if (!videoUrl) return null;
 
@@ -175,8 +187,8 @@ const VideoModal = ({ videoUrl, onClose }: { videoUrl: string | null; onClose: (
     );
 };
 
-// Fix: Add explicit type for 'images' prop.
-const ImageSlideshow = ({ images }: { images: string[] }) => {
+// FIX: Add type annotations for component props and provide a default value to prevent crashes with optional props.
+const ImageSlideshow = ({ images = [] }: { images?: string[] }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
 
     const goToPrevious = useCallback(() => {
@@ -187,208 +199,155 @@ const ImageSlideshow = ({ images }: { images: string[] }) => {
         setCurrentIndex(prevIndex => (prevIndex === images.length - 1 ? 0 : prevIndex + 1));
     }, [images.length]);
 
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'ArrowRight') {
-                goToNext();
-            } else if (e.key === 'ArrowLeft') {
-                goToPrevious();
-            }
-        };
-        window.addEventListener('keydown', handleKeyDown);
-        return () => {
-            window.removeEventListener('keydown', handleKeyDown);
-        };
-    }, [goToNext, goToPrevious]);
-
-    if (!images || images.length === 0) return null;
+    // FIX: Simplify condition after providing a default value for images prop.
+    if (images.length === 0) {
+        return <div className="slideshow-image-wrapper">No images available</div>;
+    }
 
     return (
         <div className="slideshow-container">
-            <button className="slideshow-nav prev" onClick={goToPrevious} aria-label="Previous image">&#10094;</button>
             <div className="slideshow-image-wrapper">
-                 <img key={currentIndex} src={images[currentIndex]} alt={`Portfolio image ${currentIndex + 1}`} className="slideshow-image" />
+                <img src={images[currentIndex]} alt={`Slide ${currentIndex + 1}`} className="slideshow-image" />
             </div>
-            <button className="slideshow-nav next" onClick={goToNext} aria-label="Next image">&#10095;</button>
-            <div className="slideshow-counter">{`${currentIndex + 1} / ${images.length}`}</div>
+            <button className="slideshow-nav prev" onClick={goToPrevious} aria-label="Previous slide">&#10094;</button>
+            <button className="slideshow-nav next" onClick={goToNext} aria-label="Next slide">&#10095;</button>
+            <div className="slideshow-counter">{currentIndex + 1} / {images.length}</div>
         </div>
     );
 };
 
-// Fix: Define interfaces for portfolio data structure to ensure type safety throughout the component.
-interface PortfolioItemType {
-  id: number | string;
-  title: string;
-  videoUrl?: string;
-  linkUrl?: string;
-  imageUrl?: string;
-  placeholder?: boolean;
-}
-
-interface PortfolioData {
-  [category: string]: PortfolioItemType[];
-}
-
-interface PortfolioItemProps {
-  item: PortfolioItemType;
-  onVideoClick: (videoUrl: string) => void;
-}
-
-
-// Fix: Add explicit types for component props.
-const PortfolioItem = ({ item, onVideoClick }: PortfolioItemProps) => {
-    const isVideo = !!item.videoUrl;
-    const isLink = !!item.linkUrl;
-
+// FIX: Add type annotations for component props.
+const PortfolioItem = ({ item, category, onVideoClick }: { item: PortfolioItemData; category: string; onVideoClick: (videoUrl: string) => void; }) => {
+    const isClickable = item.videoUrl || item.linkUrl;
+    
     const handleClick = () => {
-        if (isVideo && item.videoUrl) {
+        if (item.videoUrl) {
             onVideoClick(item.videoUrl);
-        } else if (isLink) {
+        } else if (item.linkUrl) {
             window.open(item.linkUrl, '_blank', 'noopener,noreferrer');
         }
     };
     
-    const handleKeyPress = (event: React.KeyboardEvent) => {
-        if (event.key === 'Enter' || event.key === ' ') {
+    // FIX: Add type for event parameter.
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
             handleClick();
         }
     };
 
+    let icon = null;
+    if (item.videoUrl) {
+        icon = <div className="play-icon"></div>;
+    } else if (item.linkUrl) {
+        if (category === "AI & 程式") {
+             icon = <div className="ai-icon">AI</div>;
+        } else {
+             icon = <div className="link-icon"></div>;
+        }
+    }
+
     return (
         <div 
-          className={`portfolio-item ${item.placeholder ? 'placeholder' : ''}`}
-          onClick={item.placeholder ? undefined : handleClick}
-          onKeyPress={item.placeholder ? undefined : handleKeyPress}
-          tabIndex={item.placeholder ? -1 : 0}
-          role="button"
-          aria-label={`View project: ${item.title}`}
+            className="portfolio-item"
+            style={{ cursor: isClickable ? 'pointer' : 'default' }}
+            // FIX: Use undefined instead of null for conditional event handlers.
+            onClick={isClickable ? handleClick : undefined}
+            onKeyDown={isClickable ? handleKeyDown : undefined}
+            tabIndex={isClickable ? 0 : -1}
+            role={isClickable ? "button" : undefined}
+            aria-label={`View project: ${item.title}`}
         >
-            <div 
-                className={`portfolio-item-image ${item.placeholder ? 'placeholder-image' : ''}`} 
-                style={{ 
-                    backgroundImage: item.imageUrl ? `url(${item.imageUrl})` : 'none' 
-                }}
-            >
-                {item.placeholder ? (
-                    <span className="ai-icon">AI</span>
-                ) : isVideo ? (
-                    <div className="play-icon" aria-hidden="true"></div>
-                ) : isLink ? (
-                    <div className="link-icon" aria-hidden="true"></div>
-                ) : null}
-            </div>
-            <h4 className="portfolio-item-title">{item.title}</h4>
+            {item.images ? (
+                <ImageSlideshow images={item.images} />
+            ) : (
+                <div className="portfolio-item-image" style={{ backgroundImage: `url("${item.imageUrl}")` }}>
+                    {icon}
+                </div>
+            )}
+            <p className="portfolio-item-title">{item.title}</p>
         </div>
     );
 };
 
 const Portfolio = () => {
-    // Fix: Use defined interfaces for state to fix 'unknown' type errors and enable type checking.
+    // FIX: Add type annotation to useState for portfolioData to fix 'map' of 'unknown' error.
     const [portfolioData, setPortfolioData] = useState<PortfolioData | null>(null);
-    const [modalVideoUrl, setModalVideoUrl] = useState<string | null>(null);
-    
+    // FIX: Add type annotation to useState for selectedVideo.
+    const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
+
     useEffect(() => {
         fetch('./portfolio-data.json')
-            .then(res => {
-                if (!res.ok) {
-                    throw new Error('Network response was not ok');
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                return res.json();
+                return response.json();
             })
-            // Fix: Explicitly type the fetched data to resolve 'unknown' type errors downstream.
+            // FIX: Add type for fetched data.
             .then((data: PortfolioData) => setPortfolioData(data))
-            .catch(error => console.error('Error fetching portfolio data:', error));
+            .catch(error => {
+                console.error("Could not fetch portfolio data:", error);
+            });
     }, []);
 
-    const galleryImageUrls = [
-        "https://gmnfuedutw-my.sharepoint.com/:i:/g/personal/40248138_gm_nfu_edu_tw/EZ8J6hpG_Y9PmA978XcjjxMBd-dzXawqVsoPUeS-i2ZkDA?e=EWE7Rw&download=1",
-        "https://gmnfuedutw-my.sharepoint.com/:i:/g/personal/40248138_gm_nfu_edu_tw/EW0wtY7TIrJJqck7MzIuVxwBuLusaK5ugYLYbwIIUo5Ijg?e=7ahl0s&download=1",
-        "https://gmnfuedutw-my.sharepoint.com/:i:/g/personal/40248138_gm_nfu_edu_tw/Ee9VveGq9WxCrMqGfxxLmVcBf90qO3IDmLsrfln6jkXfug?e=7iHSAq&download=1",
-        "https://gmnfuedutw-my.sharepoint.com/:i:/g/personal/40248138_gm_nfu_edu_tw/EY7hVPo_RLBInL1hXtdA7cgBKG6_V71TCSnxpiJ7M5j6pQ?e=QnkBcc&download=1",
-        "https://gmnfuedutw-my.sharepoint.com/:i:/g/personal/40248138_gm_nfu_edu_tw/EajWUPx9D49NtmN3yyYrkugBKdkDrX7FdRW16_vzpiYvMw?e=e4OiM1&download=1",
-        "https://gmnfuedutw-my.sharepoint.com/:i:/g/personal/40248138_gm_nfu_edu_tw/EV2t8q3lf4pBrc5NluUD4vsB9twrwIxJgJFax7kCWEuGTA?e=84pbC4&download=1",
-        "https://gmnfuedutw-my.sharepoint.com/:i:/g/personal/40248138_gm_nfu_edu_tw/ESxVSOWOytZCqmabqPnEU-gBpTK1K5t9YOOUGOA0fWHtow?e=PxCHtF&download=1",
-        "https://gmnfuedutw-my.sharepoint.com/:i:/g/personal/40248138_gm_nfu_edu_tw/EQfhWdY30bdNlPxKg2YsxGABOLztjzBXrrv2dFbRMWaT7w?e=qjHrRl&download=1",
-        "https://gmnfuedutw-my.sharepoint.com/:i:/g/personal/40248138_gm_nfu_edu_tw/EScQbWLjYHVCnp4tr6QUdUkBPgbA8xoHmrgYOOb0XKERvQ?e=hIuQ5y&download=1",
-        "https://gmnfuedutw-my.sharepoint.com/:i:/g/personal/40248138_gm_nfu_edu_tw/EWKM1vh9zrpNsTFqmrnrdvIBzPTj5o_ozAdhLixniVsByA?e=IhwpUI&download=1",
-        "https://gmnfuedutw-my.sharepoint.com/:i:/g/personal/40248138_gm_nfu_edu_tw/ESf80rpbCnxEtRU9kIQj3BgB-0A-QBZ23P7Yau8opJTFiA?e=1WxqgW&download=1",
-        "https://gmnfuedutw-my.sharepoint.com/:i:/g/personal/40248138_gm_nfu_edu_tw/EaPHwocN6wpCndX-nJLce1wBfTEDVP503ZO3G44U43H49g?e=j9epJ2&download=1"
-    ];
+    // FIX: Add type for parameter.
+    const handleVideoClick = (videoUrl: string) => {
+        setSelectedVideo(videoUrl);
+    };
 
+    const closeVideoModal = useCallback(() => {
+        setSelectedVideo(null);
+    }, []);
+    
     useEffect(() => {
+        // FIX: Add type for event parameter.
         const handleEsc = (event: KeyboardEvent) => {
            if (event.key === 'Escape') {
-              closeVideoModal();
+            closeVideoModal();
            }
         };
         window.addEventListener('keydown', handleEsc);
+
         return () => {
             window.removeEventListener('keydown', handleEsc);
         };
-    }, []);
+    }, [closeVideoModal]);
 
-    // Fix: Add type for videoUrl parameter.
-    const openVideoModal = (videoUrl: string) => {
-        setModalVideoUrl(videoUrl);
-    };
+    if (!portfolioData) {
+        return <section id="portfolio" className="section"><p style={{textAlign: 'center', fontSize: '1.2rem'}}>Loading portfolio...</p></section>;
+    }
 
-    const closeVideoModal = () => {
-        setModalVideoUrl(null);
-    };
-    
     return (
         <section id="portfolio" className="section">
             <h2 className="section-title">作品集</h2>
-            <div className="portfolio-controls">
-                <a 
-                    href="https://gmnfuedutw-my.sharepoint.com/:b:/g/personal/40248138_gm_nfu_edu_tw/ER4bxtqq1lVDlaHKxP7fxTYB1gKolSedjOK-Iwt1culJLg?e=aWdT7V" 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className="portfolio-btn" 
-                    role="button"
-                >
-                    查看完整履歷 (PDF)
-                </a>
-            </div>
-             <div className="portfolio-category">
-                <h3 className="portfolio-category-title">作品畫廊</h3>
-                <ImageSlideshow images={galleryImageUrls} />
-            </div>
-            {!portfolioData ? (
-                <p style={{textAlign: 'center'}}>Loading portfolio...</p>
-            ) : (
-                Object.entries(portfolioData).map(([category, items]) => (
-                    <div key={category} className="portfolio-category">
-                        <h3 className="portfolio-category-title">{category}</h3>
-                         <div className={`portfolio-grid ${category !== 'Unreal' ? 'portfolio-grid-3-col' : ''}`}>
-                            {items.map((item) => (
-                                <PortfolioItem 
-                                  key={item.id} 
-                                  item={item} 
-                                  onVideoClick={openVideoModal}
-                                />
-                            ))}
-                        </div>
+            {/* FIX: Add explicit type annotation for the destructured map parameters to resolve type inference issues. */}
+            {Object.entries(portfolioData).map(([category, items]: [string, PortfolioItemData[]]) => (
+                <div key={category} className="portfolio-category">
+                    <h3 className="portfolio-category-title">{category}</h3>
+                    <div className="portfolio-grid">
+                        {items.map(item => (
+                            <PortfolioItem key={item.id} item={item} category={category} onVideoClick={handleVideoClick} />
+                        ))}
                     </div>
-                ))
-            )}
-            <VideoModal videoUrl={modalVideoUrl} onClose={closeVideoModal} />
+                </div>
+            ))}
+            <VideoModal videoUrl={selectedVideo} onClose={closeVideoModal} />
         </section>
     );
 };
 
-
 const Footer = () => (
     <footer id="contact" className="app-footer">
         <div className="footer-contact">
-            <h4>聯絡資訊</h4>
-            <p>📞 0903646800</p>
-            <p>📧 40248138@gm.nfu.edu.tw</p>
+            <h4>聯絡方式</h4>
+            <p>李承 (David)</p>
+            <p>📞 Phone: 0903646800</p>
+            <p>📧 Email: 40248138@gm.nfu.edu.tw</p>
         </div>
-        <p className="copyright">&copy; {new Date().getFullYear()} David Lee. All Rights Reserved.</p>
+        <p className="copyright">&copy; {new Date().getFullYear()} David's Portfolio. All Rights Reserved.</p>
     </footer>
 );
-
 
 const App = () => (
     <React.Fragment>
@@ -404,6 +363,6 @@ const App = () => (
 
 const container = document.getElementById('root');
 if (container) {
-    const root = ReactDOM.createRoot(container);
-    root.render(<App />);
+  const root = ReactDOM.createRoot(container);
+  root.render(<App />);
 }
