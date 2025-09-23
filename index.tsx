@@ -1,8 +1,8 @@
-// FIX: Import React and ReactDOM to resolve 'Cannot find name' errors.
+// Fix: Add imports for React and ReactDOM to resolve undefined errors. This makes React and its hooks available.
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import ReactDOM from 'react-dom/client';
 
-// FIX: Define interfaces for portfolio data to ensure type safety.
+// Define interfaces for portfolio data to ensure type safety.
 interface PortfolioItemData {
   id: number | string;
   title: string;
@@ -71,7 +71,7 @@ const Header = () => {
 
 
 const Hero = () => {
-    // FIX: Add type for useRef to improve type safety.
+    // Add type for useRef to improve type safety.
     const textRef = useRef<SVGTextElement>(null);
     
     useEffect(() => {
@@ -165,7 +165,6 @@ const About = () => (
   </section>
 );
 
-// FIX: Add type annotations for component props.
 const VideoModal = ({ videoUrl, onClose }: { videoUrl: string | null; onClose: () => void; }) => {
     if (!videoUrl) return null;
 
@@ -187,7 +186,6 @@ const VideoModal = ({ videoUrl, onClose }: { videoUrl: string | null; onClose: (
     );
 };
 
-// FIX: Add type annotations for component props and provide a default value to prevent crashes with optional props.
 const ImageSlideshow = ({ images = [] }: { images?: string[] }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -199,7 +197,6 @@ const ImageSlideshow = ({ images = [] }: { images?: string[] }) => {
         setCurrentIndex(prevIndex => (prevIndex === images.length - 1 ? 0 : prevIndex + 1));
     }, [images.length]);
 
-    // FIX: Simplify condition after providing a default value for images prop.
     if (images.length === 0) {
         return <div className="slideshow-image-wrapper">No images available</div>;
     }
@@ -216,7 +213,6 @@ const ImageSlideshow = ({ images = [] }: { images?: string[] }) => {
     );
 };
 
-// FIX: Add type annotations for component props.
 const PortfolioItem = ({ item, category, onVideoClick }: { item: PortfolioItemData; category: string; onVideoClick: (videoUrl: string) => void; }) => {
     const isClickable = item.videoUrl || item.linkUrl;
     
@@ -228,7 +224,6 @@ const PortfolioItem = ({ item, category, onVideoClick }: { item: PortfolioItemDa
         }
     };
     
-    // FIX: Add type for event parameter.
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
@@ -240,18 +235,13 @@ const PortfolioItem = ({ item, category, onVideoClick }: { item: PortfolioItemDa
     if (item.videoUrl) {
         icon = <div className="play-icon"></div>;
     } else if (item.linkUrl) {
-        if (category === "AI & 程式") {
-             icon = <div className="ai-icon">AI</div>;
-        } else {
-             icon = <div className="link-icon"></div>;
-        }
+        icon = <div className="link-icon"></div>;
     }
 
     return (
         <div 
             className="portfolio-item"
             style={{ cursor: isClickable ? 'pointer' : 'default' }}
-            // FIX: Use undefined instead of null for conditional event handlers.
             onClick={isClickable ? handleClick : undefined}
             onKeyDown={isClickable ? handleKeyDown : undefined}
             tabIndex={isClickable ? 0 : -1}
@@ -271,9 +261,7 @@ const PortfolioItem = ({ item, category, onVideoClick }: { item: PortfolioItemDa
 };
 
 const Portfolio = () => {
-    // FIX: Add type annotation to useState for portfolioData to fix 'map' of 'unknown' error.
     const [portfolioData, setPortfolioData] = useState<PortfolioData | null>(null);
-    // FIX: Add type annotation to useState for selectedVideo.
     const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
 
     useEffect(() => {
@@ -284,14 +272,12 @@ const Portfolio = () => {
                 }
                 return response.json();
             })
-            // FIX: Add type for fetched data.
             .then((data: PortfolioData) => setPortfolioData(data))
             .catch(error => {
                 console.error("Could not fetch portfolio data:", error);
             });
     }, []);
 
-    // FIX: Add type for parameter.
     const handleVideoClick = (videoUrl: string) => {
         setSelectedVideo(videoUrl);
     };
@@ -301,7 +287,6 @@ const Portfolio = () => {
     }, []);
     
     useEffect(() => {
-        // FIX: Add type for event parameter.
         const handleEsc = (event: KeyboardEvent) => {
            if (event.key === 'Escape') {
             closeVideoModal();
@@ -321,7 +306,6 @@ const Portfolio = () => {
     return (
         <section id="portfolio" className="section">
             <h2 className="section-title">作品集</h2>
-            {/* FIX: Add explicit type annotation for the destructured map parameters to resolve type inference issues. */}
             {Object.entries(portfolioData).map(([category, items]: [string, PortfolioItemData[]]) => (
                 <div key={category} className="portfolio-category">
                     <h3 className="portfolio-category-title">{category}</h3>
