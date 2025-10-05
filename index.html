@@ -17,6 +17,7 @@
     }
     </script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/@babel/preset-typescript@7/babel-preset-typescript.min.js"></script>
     <style>
       :root {
         --background-color: #0d0c1d;
@@ -954,7 +955,7 @@
       };
     </script>
     
-    <script type="text/babel" data-type="module">
+    <script type="text/babel" data-type="module" data-presets="react,typescript">
       import React, { useState, useEffect, useRef, useCallback } from 'react';
       import ReactDOM from 'react-dom/client';
 

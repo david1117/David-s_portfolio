@@ -1,6 +1,12 @@
+
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
+
+declare global {
+    interface Window {
+        portfolioData: any;
+    }
+}
 
 interface PortfolioItemData {
   id: number;
@@ -250,7 +256,6 @@ const PortfolioItem = ({ item, onVideoClick }: { item: PortfolioItemData; onVide
     return (
         <div 
             className="portfolio-item"
-            style={{ cursor: isClickable ? 'pointer' : 'default' }}
             onClick={isClickable ? handleClick : undefined}
             onKeyDown={isClickable ? handleKeyDown : undefined}
             tabIndex={isClickable ? 0 : -1}
@@ -340,10 +345,11 @@ const Portfolio = () => {
     const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
 
     useEffect(() => {
-      fetch('/portfolio-data.json')
-        .then(response => response.json())
-        .then(data => setPortfolioData(data))
-        .catch(error => console.error("Error fetching portfolio data:", error));
+      if (window.portfolioData) {
+        setPortfolioData(window.portfolioData);
+      } else {
+        console.error("Error: Portfolio data not found on window object. Make sure it's embedded in your HTML.");
+      }
     }, []);
 
     const handleVideoClick = (videoUrl: string) => {
