@@ -7,8 +7,15 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script type="importmap">
+    {
+      "imports": {
+        "react": "https://aistudiocdn.com/react@^19.2.0",
+        "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+        "react/": "https://aistudiocdn.com/react@^19.2.0/"
+      }
+    }
+    </script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
       :root {
@@ -397,15 +404,9 @@
         border-radius: 8px;
         overflow: hidden;
         position: relative;
-        border: 1px solid var(--border-color);
+        border: 1px solid var(--accent-color);
+        box-shadow: 0 0 10px rgba(158, 255, 0, 0.4);
         cursor: pointer;
-        transition: box-shadow 0.3s ease;
-      }
-
-      .featured-image-wrapper:hover, .featured-image-wrapper:focus-visible {
-        box-shadow: 0 0 20px var(--border-color);
-        outline: 2px solid var(--accent-color);
-        outline-offset: 2px;
       }
 
       .featured-image {
@@ -420,9 +421,11 @@
         position: absolute;
         top: 50%;
         transform: translateY(-50%);
-        background-color: rgba(13, 12, 29, 0.7);
+        background-color: rgba(13, 12, 29, 0.5);
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
         color: var(--accent-color);
-        border: 1px solid var(--border-color);
+        border: 1px solid var(--accent-color);
         border-radius: 50%;
         width: 44px;
         height: 44px;
@@ -432,33 +435,33 @@
         align-items: center;
         justify-content: center;
         font-size: 1.5rem;
-        transition: background-color 0.3s ease, color 0.3s ease;
+        transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
       }
 
       .featured-slideshow-nav:hover {
         background-color: var(--accent-color);
         color: var(--background-color);
+        box-shadow: 0 0 15px var(--accent-color);
       }
 
       .featured-slideshow-nav.prev {
-        left: 10px;
+        left: 1rem;
       }
 
       .featured-slideshow-nav.next {
-        right: 10px;
+        right: 1rem;
       }
 
       .featured-slideshow-counter {
-          color: #f2f2f2;
-          font-size: 12px;
-          padding: 8px 12px;
+          color: var(--primary-text-color);
+          font-size: 1rem;
           position: absolute;
-          bottom: 16px;
+          bottom: 1rem;
           left: 50%;
           transform: translateX(-50%);
-          background-color: rgba(0,0,0,0.6);
-          border-radius: 5px;
+          background-color: transparent;
           z-index: 10;
+          text-shadow: 0 1px 3px rgba(0,0,0,0.5);
       }
 
       .portfolio-category {
@@ -503,11 +506,14 @@
         border-radius: 8px;
         overflow: hidden;
         transition: transform 0.3s ease, box-shadow 0.3s ease;
-        cursor: pointer;
         position: relative;
       }
+      
+      .portfolio-item[role="button"] {
+        cursor: pointer;
+      }
 
-      .portfolio-item:hover, .portfolio-item:focus {
+      .portfolio-item:hover, .portfolio-item:focus-within {
         transform: translateY(-5px);
         box-shadow: 0 0 20px var(--border-color);
         outline: none;
@@ -537,7 +543,7 @@
         transition: opacity 0.3s ease;
       }
 
-      .portfolio-item:hover .portfolio-item-image::before {
+      .portfolio-item[role="button"]:hover .portfolio-item-image::before {
         opacity: 1;
       }
 
@@ -577,13 +583,13 @@
         line-height: 1;
       }
 
-      .portfolio-item:hover .play-icon,
-      .portfolio-item:hover .link-icon {
+      .portfolio-item[role="button"]:hover .play-icon,
+      .portfolio-item[role="button"]:hover .link-icon {
           transform: scale(1.1);
           background-color: rgba(158, 255, 0, 0.5);
       }
-      .portfolio-item:hover .play-icon::after,
-      .portfolio-item:hover .link-icon::after {
+      .portfolio-item[role="button"]:hover .play-icon::after,
+      .portfolio-item[role="button"]:hover .link-icon::after {
           color: #fff;
       }
 
@@ -836,521 +842,549 @@
         }
       }
     </style>
-<script type="importmap">
-{
-  "imports": {
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/"
-  }
-}
-</script>
 <link rel="stylesheet" href="/index.css">
 </head>
 <body>
     <div id="root"></div>
-    <script type="text/babel">
-const { useState, useEffect, useRef, useCallback, Fragment } = React;
 
-const portfolioData = {
-  "3D": [
-    {
-      "id": 1,
-      "title": "各式模型 (Models)",
-      "linkUrl": "https://gmnfuedutw-my.sharepoint.com/my?id=%2Fpersonal%2F40248138%5Fgm%5Fnfu%5Fedu%5Ftw%2FDocuments%2FTop%2Dline%2F3D%20Model&viewid=075715f7%2Da2f3%2D42f8%2D84b8%2Df664e9994565",
-      "imageUrl": "/assets/3d-models.jpg"
-    },
-    {
-      "id": 2,
-      "title": "各式場景 (Scenes)",
-      "linkUrl": "https://gmnfuedutw-my.sharepoint.com/:f:/g/personal/40248138_gm_nfu_edu_tw/Esx73vdiREZGn6mHr0zSt7YBgrDW8F4OWwdpyMvcjDyAyQ?e=fbHEbi",
-      "imageUrl": "/assets/3d-scenes.jpg"
-    },
-    {
-      "id": 3,
-      "title": "各式組裝 (Assemblies)",
-      "linkUrl": "https://gmnfuedutw-my.sharepoint.com/:f:/g/personal/40248138_gm_nfu_edu_tw/EgQzLYLsmjFCgagsZ-4NR50BsvGop2Z46YYNBdVnaM4ncg?e=DcQi11",
-      "imageUrl": "/assets/3d-assemblies.jpg"
-    },
-    {
-      "id": 10,
-      "title": "相片建模 (Photogrammetry)",
-      "videoUrl": "https://www.youtube.com/embed/A4SjFe8iGOU",
-      "imageUrl": "/assets/3d-photogrammetry.jpg"
-    },
-    {
-      "id": 11,
-      "title": "3D廣告 (3D Advertisement)",
-      "videoUrl": "https://www.youtube.com/embed/44Nn3DWmbRM",
-      "imageUrl": "/assets/3d-advertisement.jpg"
-    },
-    {
-      "id": 12,
-      "title": "場景展示2 (Scene Showcase 2)",
-      "videoUrl": "https://www.youtube.com/embed/_16yoH_IalI",
-      "imageUrl": "/assets/3d-scene-showcase-2.jpg"
-    }
-  ],
-  "Unreal": [
-    {
-      "id": 13,
-      "title": "虛擬網站 (Virtual Website)",
-      "videoUrl": "https://www.youtube.com/embed/SmUZq6l9UNE",
-      "imageUrl": "/assets/unreal-virtual-website.jpg"
-    },
-    {
-      "id": 14,
-      "title": "全國電子 (E-Life Mall)",
-      "videoUrl": "https://www.youtube.com/embed/wUBZycFWKIU",
-      "imageUrl": "/assets/unreal-elife-mall.jpg"
-    },
-    {
-      "id": 15,
-      "title": "廣告製作 (Advertisement Production)",
-      "videoUrl": "https://www.youtube.com/embed/jx-uK9CmeQU",
-      "imageUrl": "/assets/unreal-advertisement.jpg"
-    },
-    {
-      "id": 16,
-      "title": "VR製作 (VR Production)",
-      "videoUrl": "https://www.youtube.com/embed/61JqRrlYkHM",
-      "imageUrl": "/assets/unreal-vr.jpg"
-    },
-    {
-      "id": 17,
-      "title": "電影製作 (Film Production)",
-      "videoUrl": "https://www.youtube.com/embed/kOXa8ZnMKb8",
-      "imageUrl": "/assets/unreal-film.jpg"
-    },
-    {
-      "id": 18,
-      "title": "VP展示 (VP Showcase)",
-      "videoUrl": "https://www.youtube.com/embed/mGnytWgkM04",
-      "imageUrl": "/assets/unreal-vp-showcase.jpg"
-    }
-  ],
-  "AI & 程式": [
-    {
-      "id": 7,
-      "title": "LS_Designer",
-      "linkUrl": "https://ls-designer.vercel.app/",
-      "imageUrl": "/assets/ai-ls-designer.jpg"
-    },
-    {
-      "id": 8,
-      "title": "Google Sheets 圖片生成器",
-      "linkUrl": "https://huggingface.co/spaces/davidlee831117/AutoLS_2",
-      "imageUrl": "/assets/ai-google-sheets-generator.jpg"
-    },
-    {
-      "id": 9,
-      "title": "各式AI",
-      "linkUrl": "https://gmnfuedutw-my.sharepoint.com/:f:/g/personal/40248138_gm_nfu_edu_tw/EuJGZHmPO51JuBHiTXtB2k4BZTUDBbT36S19TouYS3Hi0Q?e=DCDMsI",
-      "imageUrl": "/assets/ai-various.jpg"
-    },
-    {
-      "id": 19,
-      "title": "Digital-Twin-Platform",
-      "linkUrl": "https://digital-twin-ai-platform.vercel.app/",
-      "imageUrl": "/assets/ai-digtal-twin-platform.jpg"
-    }
-  ]
-};
-
-const Header = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
-
-  const closeMenu = () => {
-    setIsMenuOpen(false);
-  };
-
-  useEffect(() => {
-    if (isMenuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'auto';
-    }
-    return () => {
-      document.body.style.overflow = 'auto';
-    };
-  }, [isMenuOpen]);
-  
-  return (
-    <header className="app-header">
-      <a href="#home" className="logo" onClick={closeMenu}>David<span>.</span></a>
-      
-      <nav className="nav-links">
-        <a href="#about">About</a>
-        <a href="#portfolio">Portfolio</a>
-        <a href="#contact">Contact</a>
-      </nav>
-
-      <button className="burger-menu" onClick={toggleMenu} aria-label="Toggle Navigation" aria-expanded={isMenuOpen}>
-        <span className="burger-line"></span>
-        <span className="burger-line"></span>
-        <span className="burger-line"></span>
-      </button>
-
-      <div className={`mobile-menu ${isMenuOpen ? 'is-open' : ''}`}>
-        <button className="close-menu-btn" onClick={closeMenu} aria-label="Close Navigation">&times;</button>
-        <nav className="mobile-nav-links">
-          <a href="#about" onClick={closeMenu}>About</a>
-          <a href="#portfolio" onClick={closeMenu}>Portfolio</a>
-          <a href="#contact" onClick={closeMenu}>Contact</a>
-        </nav>
-      </div>
-    </header>
-  );
-};
-
-const Hero = () => {
-    const textRef = useRef(null);
+    <script>
+      window.portfolioData = {
+        "3D": [
+          {
+            "id": 1,
+            "title": "各式模型 (Models)",
+            "linkUrl": "https://gmnfuedutw-my.sharepoint.com/my?id=%2Fpersonal%2F40248138%5Fgm%5Fnfu%5Fedu%5Ftw%2FDocuments%2FTop%2Dline%2F3D%20Model&viewid=075715f7%2Da2f3%2D42f8%2D84b8%2Df664e9994565",
+            "imageUrl": "/assets/3d-models.jpg"
+          },
+          {
+            "id": 2,
+            "title": "各式場景 (Scenes)",
+            "linkUrl": "https://gmnfuedutw-my.sharepoint.com/:f:/g/personal/40248138_gm_nfu_edu_tw/Esx73vdiREZGn6mHr0zSt7YBgrDW8F4OWwdpyMvcjDyAyQ?e=fbHEbi",
+            "imageUrl": "/assets/3d-scenes.jpg"
+          },
+          {
+            "id": 3,
+            "title": "各式組裝 (Assemblies)",
+            "linkUrl": "https://gmnfuedutw-my.sharepoint.com/:f:/g/personal/40248138_gm_nfu_edu_tw/EgQzLYLsmjFCgagsZ-4NR50BsvGop2Z46YYNBdVnaM4ncg?e=DcQi11",
+            "imageUrl": "/assets/3d-assemblies.jpg"
+          },
+          {
+            "id": 10,
+            "title": "相片建模 (Photogrammetry)",
+            "videoUrl": "https://www.youtube.com/embed/A4SjFe8iGOU",
+            "imageUrl": "/assets/3d-photogrammetry.jpg"
+          },
+          {
+            "id": 11,
+            "title": "3D廣告 (3D Advertisement)",
+            "videoUrl": "https://www.youtube.com/embed/44Nn3DWmbRM",
+            "imageUrl": "/assets/3d-advertisement.jpg"
+          },
+          {
+            "id": 12,
+            "title": "場景展示2 (Scene Showcase 2)",
+            "videoUrl": "https://www.youtube.com/embed/_16yoH_IalI",
+            "imageUrl": "/assets/3d-scene-showcase-2.jpg"
+          }
+        ],
+        "Unreal": [
+          {
+            "id": 13,
+            "title": "虛擬網站 (Virtual Website)",
+            "videoUrl": "https://www.youtube.com/embed/SmUZq6l9UNE",
+            "imageUrl": "/assets/unreal-virtual-website.jpg"
+          },
+          {
+            "id": 14,
+            "title": "全國電子 (E-Life Mall)",
+            "videoUrl": "https://www.youtube.com/embed/wUBZycFWKIU",
+            "imageUrl": "/assets/unreal-elife-mall.jpg"
+          },
+          {
+            "id": 15,
+            "title": "廣告製作 (Advertisement Production)",
+            "videoUrl": "https://www.youtube.com/embed/jx-uK9CmeQU",
+            "imageUrl": "/assets/unreal-advertisement.jpg"
+          },
+          {
+            "id": 16,
+            "title": "VR製作 (VR Production)",
+            "videoUrl": "https://www.youtube.com/embed/61JqRrlYkHM",
+            "imageUrl": "/assets/unreal-vr.jpg"
+          },
+          {
+            "id": 17,
+            "title": "電影製作 (Film Production)",
+            "videoUrl": "https://www.youtube.com/embed/kOXa8ZnMKb8",
+            "imageUrl": "/assets/unreal-film.jpg"
+          },
+          {
+            "id": 18,
+            "title": "VP展示 (VP Showcase)",
+            "videoUrl": "https://www.youtube.com/embed/mGnytWgkM04",
+            "imageUrl": "/assets/unreal-vp-showcase.jpg"
+          }
+        ],
+        "AI & 程式": [
+          {
+            "id": 7,
+            "title": "LS_Designer",
+            "linkUrl": "https://ls-designer.vercel.app/",
+            "imageUrl": "/assets/ai-ls-designer.jpg"
+          },
+          {
+            "id": 8,
+            "title": "Google Sheets 圖片生成器",
+            "linkUrl": "https://huggingface.co/spaces/davidlee831117/AutoLS_2",
+            "imageUrl": "/assets/ai-google-sheets-generator.jpg"
+          },
+          {
+            "id": 9,
+            "title": "各式AI",
+            "linkUrl": "https://gmnfuedutw-my.sharepoint.com/:f:/g/personal/40248138_gm_nfu_edu_tw/EuJGZHmPO51JuBHiTXtB2k4BZTUDBbT36S19TouYS3Hi0Q?e=DCDMsI",
+            "imageUrl": "/assets/ai-various.jpg"
+          },
+          {
+            "id": 19,
+            "title": "Digital-Twin-Platform",
+            "linkUrl": "https://digital-twin-ai-platform.vercel.app/",
+            "imageUrl": "/assets/ai-digtal-twin-platform.jpg"
+          }
+        ]
+      };
+    </script>
     
-    useEffect(() => {
-        const textElement = textRef.current;
-        if (textElement) {
-            const pathLength = textElement.getComputedTextLength();
-            textElement.style.strokeDasharray = pathLength.toString();
-            textElement.style.strokeDashoffset = pathLength.toString();
-            textElement.classList.add('animate');
-        }
-    }, []);
+    <script type="text/babel" data-type="module">
+      import React, { useState, useEffect, useRef, useCallback } from 'react';
+      import ReactDOM from 'react-dom/client';
 
-    return (
-        <section id="home" className="hero">
-            <div className="hero-title-container">
-                <svg className="hero-title-svg" viewBox="0 0 900 120">
-                    <text
-                        ref={textRef}
-                        className="hero-title-text"
-                        x="50%"
-                        y="50%"
-                        dy=".35em"
-                        textAnchor="middle"
-                    >
-                        David's Portfolio
-                    </text>
-                </svg>
+      declare global {
+          interface Window {
+              portfolioData: any;
+          }
+      }
+
+      interface PortfolioItemData {
+        id: number;
+        title: string;
+        linkUrl?: string;
+        videoUrl?: string;
+        imageUrl: string;
+        images?: string[];
+      }
+
+      interface PortfolioData {
+        [category: string]: PortfolioItemData[];
+      }
+
+      const Header = () => {
+        const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+        const toggleMenu = () => {
+          setIsMenuOpen(!isMenuOpen);
+        };
+
+        const closeMenu = () => {
+          setIsMenuOpen(false);
+        };
+
+        useEffect(() => {
+          if (isMenuOpen) {
+            document.body.style.overflow = 'hidden';
+          } else {
+            document.body.style.overflow = 'auto';
+          }
+          return () => {
+            document.body.style.overflow = 'auto';
+          };
+        }, [isMenuOpen]);
+        
+        return (
+          <header className="app-header">
+            <a href="#home" className="logo" onClick={closeMenu}>David<span>.</span></a>
+            
+            <nav className="nav-links">
+              <a href="#about">About</a>
+              <a href="#portfolio">Portfolio</a>
+              <a href="#contact">Contact</a>
+            </nav>
+
+            <button className="burger-menu" onClick={toggleMenu} aria-label="Toggle Navigation" aria-expanded={isMenuOpen}>
+              <span className="burger-line"></span>
+              <span className="burger-line"></span>
+              <span className="burger-line"></span>
+            </button>
+
+            <div className={`mobile-menu ${isMenuOpen ? 'is-open' : ''}`}>
+              <button className="close-menu-btn" onClick={closeMenu} aria-label="Close Navigation">&times;</button>
+              <nav className="mobile-nav-links">
+                <a href="#about" onClick={closeMenu}>About</a>
+                <a href="#portfolio" onClick={closeMenu}>Portfolio</a>
+                <a href="#contact" onClick={closeMenu}>Contact</a>
+              </nav>
             </div>
-            <h2 className="hero-subtitle">李承 作品集</h2>
-            <a href="#about" className="scroll-down" aria-label="Scroll down">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="m9 12.75 3 3m0 0 3-3m-3 3v-7.5" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                </svg>
-            </a>
+          </header>
+        );
+      };
+
+      const Hero = () => {
+          const textRef = useRef<SVGTextElement>(null);
+          
+          useEffect(() => {
+              const textElement = textRef.current;
+              if (textElement) {
+                  const pathLength = textElement.getComputedTextLength();
+                  textElement.style.strokeDasharray = pathLength.toString();
+                  textElement.style.strokeDashoffset = pathLength.toString();
+                  textElement.classList.add('animate');
+              }
+          }, []);
+
+          return (
+              <section id="home" className="hero">
+                  <div className="hero-title-container">
+                      <svg className="hero-title-svg" viewBox="0 0 900 120">
+                          <text
+                              ref={textRef}
+                              className="hero-title-text"
+                              x="50%"
+                              y="50%"
+                              dy=".35em"
+                              textAnchor="middle"
+                          >
+                              David's Portfolio
+                          </text>
+                      </svg>
+                  </div>
+                  <h2 className="hero-subtitle">李承 作品集</h2>
+                  <a href="#about" className="scroll-down" aria-label="Scroll down">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="m9 12.75 3 3m0 0 3-3m-3 3v-7.5" />
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                      </svg>
+                  </a>
+              </section>
+          );
+      };
+
+      const About = () => (
+        <section id="about" className="section">
+          <h2 className="section-title">個人簡介</h2>
+          <div className="about-card">
+            <div className="about-intro">
+              <img src="/assets/profile-pic.jpg" alt="David Lee's profile picture" className="profile-pic" />
+              <h3>李承</h3>
+              <div className="contact-info">
+                <p>📞 0903646800</p>
+                <p>📧 40248138@gm.nfu.edu.tw</p>
+                <p>🎂 1994/11/17</p>
+              </div>
+            </div>
+
+            <div className="about-details">
+              <div className="detail-section">
+                <h4>學歷</h4>
+                <ul>
+                  <li><strong>國立虎尾科技大學</strong><br/>多媒體設計系</li>
+                  <li><strong>台北市大安高工</strong><br/>圖文傳播科</li>
+                </ul>
+              </div>
+              <div className="detail-section">
+                <h4>工作經歷</h4>
+                <ul>
+                  <li><strong>珠峰數位影像有限公司</strong><br/>3D建模/技術美術 (2017.11-至今)</li>
+                </ul>
+              </div>
+              <div className="detail-section">
+                <h4>證照</h4>
+                <ul>
+                  <li>丙級圖文組版技術士</li>
+                  <li>Adobe Certified Associate</li>
+                  <li>MOS Microsoft</li>
+                </ul>
+              </div>
+              <div className="detail-section">
+                <h4>得獎經歷</h4>
+                <ul>
+                  <li>Wayfair 3D 建模廠商第一名 (2018)</li>
+                  <li>Overstock 3D 建模廠商第一名 (2019)</li>
+                </ul>
+              </div>
+              <div className="autobiography">
+                <h4>自傳</h4>
+                <p>我是一名熱愛 3D技術、虛擬製作與AI創作的3DArtist,致力於不斷提升技能與知識,並在多個專案中累積了寶貴成果,擁有七年豐富經驗。</p>
+                <p>▶核心技能:涵蓋3DMAX(動畫、建模、VRAY 材質渲染、TyFlow)BLENDER(動畫、建模、GeometryNode)及Substance Painter (PBR 貼圖製作) 。 ,精通 Unreal 引擎的 blueprint 與 Lumen 環境烘焙,能將精緻虛擬場景導入 Virtual Production 虛擬LED 棚進行實務拍攝。</p>
+                <p>▶專案經驗:為客戶製作擬真 3D家具與組裝動畫,並參與IN3D虛擬購物網站與全國電子虛擬購物網站與AR互動製作,透過Blueprint 大幅提升效率。</p>
+                <p>▶製片廠經驗:參與電影《老狐狸》虛擬製作,能與導演、攝影師等合作的經驗,使虛擬環境與真實拍攝完美融合。</p>  
+                <p>近年來,我也積極探索 AI 繪圖與影片生成技術,擁有從 Stable Diffusion到 ComfyUI 再到 nano banana 的實戰經驗,並能運用wan2.2、Kling Al等工具進行影片生成。我具備基礎程式能力,並能運用 Google AI Studio、Cursor、Copilot等AI 輔助工具開發 App DEMO,將AI應用於更多元的創作領域。</p>
+              </div>
+            </div>
+          </div>
         </section>
-    );
-};
+      );
 
-const About = () => (
-  <section id="about" className="section">
-    <h2 className="section-title">個人簡介</h2>
-    <div className="about-card">
-      <div className="about-intro">
-        <img src="/assets/profile-pic.jpg" alt="David Lee's profile picture" className="profile-pic" />
-        <h3>李承</h3>
-        <div className="contact-info">
-          <p>📞 0903646800</p>
-          <p>📧 40248138@gm.nfu.edu.tw</p>
-          <p>🎂 1994/11/17</p>
-        </div>
-      </div>
+      const VideoModal = ({ videoUrl, onClose }: { videoUrl: string | null; onClose: () => void; }) => {
+          if (!videoUrl) return null;
 
-      <div className="about-details">
-        <div className="detail-section">
-          <h4>學歷</h4>
-          <ul>
-            <li><strong>國立虎尾科技大學</strong><br/>多媒體設計系</li>
-            <li><strong>台北市大安高工</strong><br/>圖文傳播科</li>
-          </ul>
-        </div>
-        <div className="detail-section">
-          <h4>工作經歷</h4>
-          <ul>
-            <li><strong>珠峰數位影像有限公司</strong><br/>3D建模/技術美術 (2017.11-至今)</li>
-          </ul>
-        </div>
-        <div className="detail-section">
-          <h4>證照</h4>
-          <ul>
-            <li>丙級圖文組版技術士</li>
-            <li>Adobe Certified Associate</li>
-            <li>MOS Microsoft</li>
-          </ul>
-        </div>
-        <div className="detail-section">
-          <h4>得獎經歷</h4>
-          <ul>
-            <li>Wayfair 3D 建模廠商第一名 (2018)</li>
-            <li>Overstock 3D 建模廠商第一名 (2019)</li>
-          </ul>
-        </div>
-        <div className="autobiography">
-          <h4>自傳</h4>
-          <p>我是一名熱愛 3D技術、虛擬製作與AI創作 的 3D Artist，具備七年豐富經驗。我致力於不斷提升技能與知識，並在多個專案中累積了寶貴成果。</p>
-          <p>我的核心技能涵蓋 3DMAX（動畫、建模、VRAY 材質渲染、TyFlow）、BLENDER（動畫、建模、GeometryNode）及 Substance Painter（PBR 貼圖製作）。我精通 Unreal 引擎的 blueprint 與 Lumen 環境烘焙，能將精緻虛擬場景導入 Virtual Production 虛擬 LED 棚進行實務拍攝。在專案上，我曾為客戶製作擬真 3D 家具與組裝動畫，並參與 IN3D 虛擬購物網站與全國電子虛擬購物網站的 VR 互動製作，透過 Blueprint 大幅提升效率。製片廠的經驗也讓我具備與導演、攝影師等協作的能力，確保虛擬環境與真實拍攝完美融合。</p>
-          <p>近年來，我也積極探索 AI 繪圖與影片生成技術，擁有從 Stable Diffusion 到 ComfyUI 再到 nano banana 的實戰經驗，并能運用 wan2.2、Kling AI 等工具進行影片生成。我具備基礎程式能力，並能運用 Google AI Studio、Cursor、Copilot 等 AI 輔助工具開發 App DEMO，將 AI 應用於更多元的創作領域。</p>
-        </div>
-      </div>
-    </div>
-  </section>
-);
+          return (
+              <div className="video-modal-overlay" onClick={onClose}>
+                  <div className="video-modal-content" onClick={(e) => e.stopPropagation()}>
+                      <button className="video-modal-close" onClick={onClose} aria-label="Close video player">&times;</button>
+                      <div className="video-responsive-container">
+                          <iframe
+                              src={`${videoUrl}?autoplay=1`}
+                              title="Portfolio Video Player"
+                              frameBorder="0"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                          ></iframe>
+                      </div>
+                  </div>
+              </div>
+          );
+      };
 
-const VideoModal = ({ videoUrl, onClose }) => {
-    if (!videoUrl) return null;
+      const ImageModal = ({ imageUrl, onClose }: { imageUrl: string | null; onClose: () => void; }) => {
+          if (!imageUrl) return null;
 
-    return (
-        <div className="video-modal-overlay" onClick={onClose}>
-            <div className="video-modal-content" onClick={(e) => e.stopPropagation()}>
-                <button className="video-modal-close" onClick={onClose} aria-label="Close video player">&times;</button>
-                <div className="video-responsive-container">
-                    <iframe
-                        src={`${videoUrl}?autoplay=1`}
-                        title="Portfolio Video Player"
-                        frameBorder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                    ></iframe>
-                </div>
-            </div>
-        </div>
-    );
-};
+          return (
+              <div className="image-modal-overlay" onClick={onClose}>
+                  <div className="image-modal-content" onClick={(e) => e.stopPropagation()}>
+                      <button className="image-modal-close" onClick={onClose} aria-label="Close image view">&times;</button>
+                      <img src={imageUrl} alt="Enlarged view" />
+                  </div>
+              </div>
+          );
+      };
 
-const ImageModal = ({ imageUrl, onClose }) => {
-    if (!imageUrl) return null;
+      const ImageSlideshow = ({ images = [] }: { images?: string[]; }) => {
+          const [currentIndex, setCurrentIndex] = useState(0);
 
-    return (
-        <div className="image-modal-overlay" onClick={onClose}>
-            <div className="image-modal-content" onClick={(e) => e.stopPropagation()}>
-                <button className="image-modal-close" onClick={onClose} aria-label="Close image view">&times;</button>
-                <img src={imageUrl} alt="Enlarged view" />
-            </div>
-        </div>
-    );
-};
+          const goToPrevious = useCallback(() => {
+              setCurrentIndex(prevIndex => (prevIndex === 0 ? images.length - 1 : prevIndex - 1));
+          }, [images.length]);
 
-const ImageSlideshow = ({ images = [] }) => {
-    const [currentIndex, setCurrentIndex] = useState(0);
+          const goToNext = useCallback(() => {
+              setCurrentIndex(prevIndex => (prevIndex === images.length - 1 ? 0 : prevIndex + 1));
+          }, [images.length]);
 
-    const goToPrevious = useCallback(() => {
-        setCurrentIndex(prevIndex => (prevIndex === 0 ? images.length - 1 : prevIndex - 1));
-    }, [images.length]);
+          if (images.length === 0) {
+              return <div className="slideshow-image-wrapper">No images available</div>;
+          }
 
-    const goToNext = useCallback(() => {
-        setCurrentIndex(prevIndex => (prevIndex === images.length - 1 ? 0 : prevIndex + 1));
-    }, [images.length]);
+          return (
+              <div className="slideshow-container">
+                  <div className="slideshow-image-wrapper">
+                      <img src={images[currentIndex]} alt={`Slide ${currentIndex + 1}`} className="slideshow-image" />
+                  </div>
+                  <button className="slideshow-nav prev" onClick={goToPrevious} aria-label="Previous slide">&#10094;</button>
+                  <button className="slideshow-nav next" onClick={goToNext} aria-label="Next slide">&#10095;</button>
+                  <div className="slideshow-counter">{currentIndex + 1} / {images.length}</div>
+              </div>
+          );
+      };
 
-    if (images.length === 0) {
-        return <div className="slideshow-image-wrapper">No images available</div>;
-    }
+      const PortfolioItem = ({ item, onVideoClick }: { item: PortfolioItemData; onVideoClick: (url: string) => void; }) => {
+          const isClickable = item.videoUrl || item.linkUrl;
+          
+          const handleClick = () => {
+              if (item.videoUrl) {
+                  onVideoClick(item.videoUrl);
+              } else if (item.linkUrl) {
+                  window.open(item.linkUrl, '_blank', 'noopener,noreferrer');
+              }
+          };
+          
+          const handleKeyDown = (e: React.KeyboardEvent) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleClick();
+              }
+          };
 
-    return (
-        <div className="slideshow-container">
-            <div className="slideshow-image-wrapper">
-                <img src={images[currentIndex]} alt={`Slide ${currentIndex + 1}`} className="slideshow-image" />
-            </div>
-            <button className="slideshow-nav prev" onClick={goToPrevious} aria-label="Previous slide">&#10094;</button>
-            <button className="slideshow-nav next" onClick={goToNext} aria-label="Next slide">&#10095;</button>
-            <div className="slideshow-counter">{currentIndex + 1} / {images.length}</div>
-        </div>
-    );
-};
+          let icon = null;
+          if (item.videoUrl) {
+              icon = <div className="play-icon"></div>;
+          } else if (item.linkUrl) {
+              icon = <div className="link-icon"></div>;
+          }
 
-const PortfolioItem = ({ item, onVideoClick }) => {
-    const isClickable = item.videoUrl || item.linkUrl;
-    
-    const handleClick = () => {
-        if (item.videoUrl) {
-            onVideoClick(item.videoUrl);
-        } else if (item.linkUrl) {
-            window.open(item.linkUrl, '_blank', 'noopener,noreferrer');
-        }
-    };
-    
-    const handleKeyDown = (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            handleClick();
-        }
-    };
+          return (
+              <div 
+                  className="portfolio-item"
+                  onClick={isClickable ? handleClick : undefined}
+                  onKeyDown={isClickable ? handleKeyDown : undefined}
+                  tabIndex={isClickable ? 0 : -1}
+                  role={isClickable ? "button" : undefined}
+                  aria-label={`View project: ${item.title}`}
+              >
+                  {item.images ? (
+                      <ImageSlideshow images={item.images} />
+                  ) : (
+                      <div className="portfolio-item-image" style={{ backgroundImage: `url("${item.imageUrl}")` }}>
+                          {icon}
+                      </div>
+                  )}
+                  <p className="portfolio-item-title">{item.title}</p>
+              </div>
+          );
+      };
 
-    let icon = null;
-    if (item.videoUrl) {
-        icon = <div className="play-icon"></div>;
-    } else if (item.linkUrl) {
-        icon = <div className="link-icon"></div>;
-    }
+      const FeaturedSlideshow = () => {
+          const images = Array.from({ length: 12 }, (_, i) => `/assets/P_${i + 1}.jpg`);
+          const [currentIndex, setCurrentIndex] = useState(0);
+          const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-    return (
-        <div 
-            className="portfolio-item"
-            style={{ cursor: isClickable ? 'pointer' : 'default' }}
-            onClick={isClickable ? handleClick : undefined}
-            onKeyDown={isClickable ? handleKeyDown : undefined}
-            tabIndex={isClickable ? 0 : -1}
-            role={isClickable ? "button" : undefined}
-            aria-label={`View project: ${item.title}`}
-        >
-            {item.images ? (
-                <ImageSlideshow images={item.images} />
-            ) : (
-                <div className="portfolio-item-image" style={{ backgroundImage: `url("${item.imageUrl}")` }}>
-                    {icon}
-                </div>
-            )}
-            <p className="portfolio-item-title">{item.title}</p>
-        </div>
-    );
-};
+          const goToPrevious = useCallback(() => {
+              setCurrentIndex(prevIndex => (prevIndex === 0 ? images.length - 1 : prevIndex - 1));
+          }, [images.length]);
 
-const FeaturedSlideshow = () => {
-    const images = Array.from({ length: 12 }, (_, i) => `/assets/P${i + 1}.jpg`);
-    const [currentIndex, setCurrentIndex] = useState(0);
-    const [selectedImage, setSelectedImage] = useState(null);
+          const goToNext = useCallback(() => {
+              setCurrentIndex(prevIndex => (prevIndex === images.length - 1 ? 0 : prevIndex + 1));
+          }, [images.length]);
 
-    const goToPrevious = useCallback(() => {
-        setCurrentIndex(prevIndex => (prevIndex === 0 ? images.length - 1 : prevIndex - 1));
-    }, [images.length]);
+          const openImage = (imageUrl: string) => {
+              setSelectedImage(imageUrl);
+          };
 
-    const goToNext = useCallback(() => {
-        setCurrentIndex(prevIndex => (prevIndex === images.length - 1 ? 0 : prevIndex + 1));
-    }, [images.length]);
+          const closeImage = useCallback(() => {
+              setSelectedImage(null);
+          }, []);
 
-    const openImage = (imageUrl) => {
-        setSelectedImage(imageUrl);
-    };
+          useEffect(() => {
+              const handleEsc = (event: KeyboardEvent) => {
+                 if (event.key === 'Escape') {
+                  closeImage();
+                 }
+              };
+              window.addEventListener('keydown', handleEsc);
 
-    const closeImage = useCallback(() => {
-        setSelectedImage(null);
-    }, []);
-
-    useEffect(() => {
-        const handleEsc = (event) => {
-           if (event.key === 'Escape') {
-            closeImage();
-           }
-        };
-        window.addEventListener('keydown', handleEsc);
-
-        return () => {
-            window.removeEventListener('keydown', handleEsc);
-        };
-    }, [closeImage]);
+              return () => {
+                  window.removeEventListener('keydown', handleEsc);
+              };
+          }, [closeImage]);
 
 
-    return (
-        <Fragment>
-            <div className="featured-slideshow-container">
-                <div 
-                  className="featured-image-wrapper"
-                  onClick={() => openImage(images[currentIndex])}
-                  tabIndex={0}
-                  onKeyDown={(e) => e.key === 'Enter' && openImage(images[currentIndex])}
-                  role="button"
-                  aria-label={`View featured work ${currentIndex + 1} in full screen`}
-                >
-                    <img 
-                        key={currentIndex}
-                        src={images[currentIndex]} 
-                        alt={`Featured work ${currentIndex + 1}`} 
-                        className="featured-image"
-                        loading="lazy" 
-                    />
-                </div>
-                
-                <button className="featured-slideshow-nav prev" onClick={goToPrevious} aria-label="Previous slide">&#10094;</button>
-                <button className="featured-slideshow-nav next" onClick={goToNext} aria-label="Next slide">&#10095;</button>
-                
-                <div className="featured-slideshow-counter">{currentIndex + 1} / {images.length}</div>
-            </div>
-            <ImageModal imageUrl={selectedImage} onClose={closeImage} />
-        </Fragment>
-    );
-};
+          return (
+              <React.Fragment>
+                  <div className="featured-slideshow-container">
+                      <div 
+                        className="featured-image-wrapper"
+                        onClick={() => openImage(images[currentIndex])}
+                        tabIndex={0}
+                        onKeyDown={(e) => e.key === 'Enter' && openImage(images[currentIndex])}
+                        role="button"
+                        aria-label={`View featured work ${currentIndex + 1} in full screen`}
+                      >
+                          <img 
+                              key={currentIndex}
+                              src={images[currentIndex]} 
+                              alt={`Featured work ${currentIndex + 1}`} 
+                              className="featured-image"
+                              loading="lazy" 
+                          />
+                      </div>
+                      
+                      <button className="featured-slideshow-nav prev" onClick={goToPrevious} aria-label="Previous slide">&#10094;</button>
+                      <button className="featured-slideshow-nav next" onClick={goToNext} aria-label="Next slide">&#10095;</button>
+                      
+                      <div className="featured-slideshow-counter">{currentIndex + 1} / {images.length}</div>
+                  </div>
+                  <ImageModal imageUrl={selectedImage} onClose={closeImage} />
+              </React.Fragment>
+          );
+      };
 
 
-const Portfolio = () => {
-    const [selectedVideo, setSelectedVideo] = useState(null);
+      const Portfolio = () => {
+          const [portfolioData, setPortfolioData] = useState<PortfolioData | null>(null);
+          const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
 
-    const handleVideoClick = (videoUrl) => {
-        setSelectedVideo(videoUrl);
-    };
+          useEffect(() => {
+            if (window.portfolioData) {
+              setPortfolioData(window.portfolioData);
+            } else {
+              console.error("Error: Portfolio data not found on window object.");
+            }
+          }, []);
 
-    const closeVideoModal = useCallback(() => {
-        setSelectedVideo(null);
-    }, []);
-    
-    useEffect(() => {
-        const handleEsc = (event) => {
-           if (event.key === 'Escape') {
-            closeVideoModal();
-           }
-        };
-        window.addEventListener('keydown', handleEsc);
+          const handleVideoClick = (videoUrl: string) => {
+              setSelectedVideo(videoUrl);
+          };
 
-        return () => {
-            window.removeEventListener('keydown', handleEsc);
-        };
-    }, [closeVideoModal]);
+          const closeVideoModal = useCallback(() => {
+              setSelectedVideo(null);
+          }, []);
+          
+          useEffect(() => {
+              const handleEsc = (event: KeyboardEvent) => {
+                 if (event.key === 'Escape') {
+                  closeVideoModal();
+                 }
+              };
+              window.addEventListener('keydown', handleEsc);
 
-    return (
-        <section id="portfolio" className="section">
-            <h2 className="section-title">作品集</h2>
-            <FeaturedSlideshow />
-            {Object.entries(portfolioData).map(([category, items]) => (
-                <div key={category} className="portfolio-category">
-                    <h3 className="portfolio-category-title">{category}</h3>
-                    <div className="portfolio-grid">
-                        {items.map((item) => (
-                            <PortfolioItem key={item.id} item={item} onVideoClick={handleVideoClick} />
-                        ))}
-                    </div>
-                </div>
-            ))}
-            <VideoModal videoUrl={selectedVideo} onClose={closeVideoModal} />
-        </section>
-    );
-};
+              return () => {
+                  window.removeEventListener('keydown', handleEsc);
+              };
+          }, [closeVideoModal]);
 
-const Footer = () => (
-    <footer id="contact" className="app-footer">
-        <div className="footer-contact">
-            <h4>聯絡方式</h4>
-            <p>李承 (David)</p>
-            <p>📞 Phone: 0903646800</p>
-            <p>📧 Email: 40248138@gm.nfu.edu.tw</p>
-        </div>
-        <p className="copyright">&copy; {new Date().getFullYear()} David's Portfolio. All Rights Reserved.</p>
-    </footer>
-);
+          if (!portfolioData) {
+              return <section id="portfolio" className="section"><h2 className="section-title">作品集</h2><div>Loading...</div></section>;
+          }
 
-const App = () => (
-    <Fragment>
-        <Header />
-        <main>
-            <Hero />
-            <About />
-            <Portfolio />
-        </main>
-        <Footer />
-    </Fragment>
-);
+          return (
+              <section id="portfolio" className="section">
+                  <h2 className="section-title">作品集</h2>
+                  <FeaturedSlideshow />
+                  {Object.entries(portfolioData).map(([category, items]) => (
+                      <div key={category} className="portfolio-category">
+                          <h3 className="portfolio-category-title">{category}</h3>
+                          <div className="portfolio-grid">
+                              {items.map((item: PortfolioItemData) => (
+                                  <PortfolioItem key={item.id} item={item} onVideoClick={handleVideoClick} />
+                              ))}
+                          </div>
+                      </div>
+                  ))}
+                  <VideoModal videoUrl={selectedVideo} onClose={closeVideoModal} />
+              </section>
+          );
+      };
 
-const container = document.getElementById('root');
-if (container) {
-  const root = ReactDOM.createRoot(container);
-  root.render(
-    <React.StrictMode>
-      <App />
-    </React.StrictMode>
-  );
-}
+      const Footer = () => (
+          <footer id="contact" className="app-footer">
+              <div className="footer-contact">
+                  <h4>聯絡方式</h4>
+                  <p>李承 (David)</p>
+                  <p>📞 Phone: 0903646800</p>
+                  <p>📧 Email: 40248138@gm.nfu.edu.tw</p>
+              </div>
+              <p className="copyright">&copy; {new Date().getFullYear()} David's Portfolio. All Rights Reserved.</p>
+          </footer>
+      );
+
+      const App = () => (
+          <React.Fragment>
+              <Header />
+              <main>
+                  <Hero />
+                  <About />
+                  <Portfolio />
+              </main>
+              <Footer />
+          </React.Fragment>
+      );
+
+      const container = document.getElementById('root');
+      if (container) {
+        const root = ReactDOM.createRoot(container);
+        root.render(
+          <React.StrictMode>
+            <App />
+          </React.StrictMode>
+        );
+      }
     </script>
 <script type="module" src="/index.tsx"></script>
 </body>
