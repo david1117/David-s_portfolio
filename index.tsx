@@ -1,10 +1,16 @@
-
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import ReactDOM from 'react-dom/client';
+import { GoogleGenAI } from "@google/genai";
+import { marked } from 'marked';
 
 declare global {
     interface Window {
         portfolioData: any;
+        process: {
+            env: {
+                API_KEY: string;
+            }
+        }
     }
 }
 
@@ -20,6 +26,9 @@ interface PortfolioItemData {
 interface PortfolioData {
   [category: string]: PortfolioItemData[];
 }
+
+const AUTOBIOGRAPHY_TEXT = `我是一名熱愛 3D技術、虛擬製作與AI創作的3DArtist,致力於不斷提升技能與知識,並在多個專案中累積了寶貴成果,擁有七年豐富經驗。\n\n▶核心技能:涵蓋3DMAX(動畫、建模、VRAY 材質渲染、TyFlow)BLENDER(動畫、建模、GeometryNode)及Substance Painter (PBR 貼圖製作) 。 ,精通 Unreal 引擎的 blueprint 與 Lumen 環境烘焙,能將精緻虛擬場景導入 Virtual Production 虛擬LED 棚進行實務拍攝。\n\n▶專案經驗:為客戶製作擬真 3D家具與組裝動畫,並參與IN3D虛擬購物網站與全國電子虛擬購物網站與AR互動製作,透過Blueprint 大幅提升效率。\n\n▶製片廠經驗:參與電影《老狐狸》虛擬製作,能與導演、攝影師等合作的經驗,使虛擬環境與真實拍攝完美融合。\n\n近年來,我也積極探索 AI 繪圖與影片生成技術,擁有從 Stable Diffusion到 ComfyUI 再到 nano banana 的實戰經驗,並能運用wan2.2、Kling Al等工具進行影片生成。我具備基礎程式能力,並能運用 Google AI Studio、Cursor、Copilot等AI 輔助工具開發 App DEMO,將AI應用於更多元的創作領域。`;
+const SEPARATOR = "\n---\n";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -156,11 +165,9 @@ const About = () => (
         </div>
         <div className="autobiography">
           <h4>自傳</h4>
-          <p>我是一名熱愛 3D技術、虛擬製作與AI創作的3DArtist,致力於不斷提升技能與知識,並在多個專案中累積了寶貴成果,擁有七年豐富經驗。</p>
-          <p>▶核心技能:涵蓋3DMAX(動畫、建模、VRAY 材質渲染、TyFlow)BLENDER(動畫、建模、GeometryNode)及Substance Painter (PBR 貼圖製作) 。 ,精通 Unreal 引擎的 blueprint 與 Lumen 環境烘焙,能將精緻虛擬場景導入 Virtual Production 虛擬LED 棚進行實務拍攝。</p>
-          <p>▶專案經驗:為客戶製作擬真 3D家具與組裝動畫,並參與IN3D虛擬購物網站與全國電子虛擬購物網站與AR互動製作,透過Blueprint 大幅提升效率。</p>
-          <p>▶製片廠經驗:參與電影《老狐狸》虛擬製作,能與導演、攝影師等合作的經驗,使虛擬環境與真實拍攝完美融合。</p>  
-          <p>近年來,我也積極探索 AI 繪圖與影片生成技術,擁有從 Stable Diffusion到 ComfyUI 再到 nano banana 的實戰經驗,並能運用wan2.2、Kling Al等工具進行影片生成。我具備基礎程式能力,並能運用 Google AI Studio、Cursor、Copilot等AI 輔助工具開發 App DEMO,將AI應用於更多元的創作領域。</p>
+           {AUTOBIOGRAPHY_TEXT.split('\n\n').map((paragraph, index) => (
+              <p key={index}>{paragraph}</p>
+          ))}
         </div>
       </div>
     </div>
@@ -339,7 +346,6 @@ const FeaturedSlideshow = () => {
     );
 };
 
-
 const Portfolio = () => {
     const [portfolioData, setPortfolioData] = useState<PortfolioData | null>(null);
     const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
@@ -408,6 +414,147 @@ const Footer = () => (
     </footer>
 );
 
+// --- Chat Components ---
+interface Message {
+  role: 'user' | 'assistant';
+  content: string;
+  context?: string[];
+}
+
+const ChatWindow: React.FC = () => {
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      role: 'assistant',
+      content: "你好！我可以回答關於這位3D藝術家專業背景的問題。你想知道些什麼？",
+    }
+  ]);
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const messageListRef = useRef<HTMLDivElement>(null);
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
+  useEffect(() => {
+    if (messageListRef.current) {
+      messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim() || isLoading) return;
+
+    const userMessage: Message = { role: 'user', content: input };
+    setMessages(prev => [...prev, userMessage]);
+    setInput('');
+    setIsLoading(true);
+
+    try {
+      const retrievalPrompt = `You are a research assistant. From the following document, extract the most relevant sections that can help answer the user's question. The document is in Chinese. Output only the extracted text, separated by '${SEPARATOR}'.\n\nDOCUMENT:\n${AUTOBIOGRAPHY_TEXT}\n\nUSER QUESTION:\n${input}`;
+      
+      const model = 'gemini-2.5-flash';
+      let retrieveResponse = await ai.models.generateContent({
+        model,
+        contents: retrievalPrompt,
+      });
+
+      const retrievedContext = retrieveResponse.text.split(SEPARATOR).filter(t => t.trim());
+      
+      const generationPrompt = `You are a helpful chatbot. Answer the user's question in Traditional Chinese based *only* on the provided context. Be concise and clear. If the context is insufficient, say you don't know the answer based on the provided text.\n\nCONTEXT:\n${retrievedContext.join('\n\n')}\n\nUSER QUESTION:\n${input}`;
+      
+      let finalResponse = await ai.models.generateContent({
+        model,
+        contents: generationPrompt,
+      });
+
+      const assistantMessage: Message = {
+        role: 'assistant',
+        content: finalResponse.text,
+        context: retrievedContext.length > 0 ? retrievedContext : undefined,
+      };
+      setMessages(prev => [...prev, assistantMessage]);
+
+    } catch (error) {
+      console.error("Error generating content:", error);
+      const errorMessage: Message = {
+        role: 'assistant',
+        content: "抱歉，我遇到了一些問題，請稍後再試。",
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleTextareaKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage(e);
+    }
+  };
+
+  return (
+    <>
+      <header>
+        <h1>AI 助理</h1>
+      </header>
+      <div className="message-list" ref={messageListRef}>
+        {messages.map((msg, index) => (
+          <div key={index} className={`message ${msg.role}`}>
+            <div className="bubble" dangerouslySetInnerHTML={{ __html: marked.parse(msg.content) }}></div>
+            {msg.role === 'assistant' && msg.context && (
+              <div className="context-section">
+                <h3>Retrieved Context</h3>
+                {msg.context.map((ctx, i) => (
+                  <p key={i} className="context-item">{ctx.trim()}</p>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+        {isLoading && (
+          <div className="message loading">
+            <div className="spinner"></div>
+          </div>
+        )}
+      </div>
+      <form className="input-form" onSubmit={handleSendMessage}>
+        <textarea
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={handleTextareaKey}
+          placeholder="詢問關於此文件內容的問題..."
+          aria-label="Chat input"
+          rows={1}
+        />
+        <button type="submit" disabled={isLoading || !input.trim()} aria-label="Send message">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+        </button>
+      </form>
+    </>
+  );
+};
+
+const ChatWidget: React.FC = () => {
+    const [isOpen, setIsOpen] = useState(false);
+    const toggleChat = () => setIsOpen(!isOpen);
+
+    return (
+        <div className="chat-widget">
+            <div className={`chat-container ${isOpen ? 'open' : 'closed'}`}>
+                <ChatWindow />
+            </div>
+            <button className="chat-launcher" onClick={toggleChat} aria-label={isOpen ? "Close chat" : "Open chat"}>
+                {isOpen ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                )}
+            </button>
+        </div>
+    );
+}
+
+// --- Main App ---
 const App = () => (
     <React.Fragment>
         <Header />
@@ -417,6 +564,7 @@ const App = () => (
             <Portfolio />
         </main>
         <Footer />
+        <ChatWidget />
     </React.Fragment>
 );
 
