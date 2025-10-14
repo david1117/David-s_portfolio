@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import ReactDOM from 'react-dom/client';
 import { GoogleGenAI } from "https://aistudiocdn.com/@google/genai";
@@ -432,7 +431,6 @@ const ChatWindow: React.FC = () => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messageListRef = useRef<HTMLDivElement>(null);
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
   useEffect(() => {
     if (messageListRef.current) {
@@ -450,6 +448,8 @@ const ChatWindow: React.FC = () => {
     setIsLoading(true);
 
     try {
+      const ai = new GoogleGenAI({ apiKey: 'AIzaSyAE1jE3tzQ0f2f6L9cJsJtzDY6WTHkXoxo' });
+      
       const retrievalPrompt = `You are a research assistant. From the following document, extract the most relevant sections that can help answer the user's question. The document is in Chinese. Output only the extracted text, separated by '${SEPARATOR}'.\n\nDOCUMENT:\n${AUTOBIOGRAPHY_TEXT}\n\nUSER QUESTION:\n${input}`;
       
       const model = 'gemini-2.5-flash';
@@ -476,9 +476,13 @@ const ChatWindow: React.FC = () => {
 
     } catch (error) {
       console.error("Error generating content:", error);
+      let content = "抱歉，我遇到了一些問題，請稍後再試。";
+      if (error instanceof ReferenceError || (error instanceof Error && error.message.includes("API key"))) {
+        content = "抱歉，AI 助理功能目前無法使用。";
+      }
       const errorMessage: Message = {
         role: 'assistant',
-        content: "抱歉，我遇到了一些問題，請稍後再試。",
+        content: content,
       };
       setMessages(prev => [...prev, errorMessage]);
     } finally {
