@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import ReactDOM from 'react-dom/client';
 import { GoogleGenAI } from "https://aistudiocdn.com/@google/genai";
-import { marked } from 'marked';
+import { marked } from "https://aistudiocdn.com/marked@^13.0.0";
 
 declare global {
     interface Window {
