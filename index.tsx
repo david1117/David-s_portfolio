@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import ReactDOM from 'react-dom/client';
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI } from "https://aistudiocdn.com/@google/genai";
 import { marked } from 'marked';
 
 declare global {
