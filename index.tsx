@@ -27,7 +27,33 @@ interface PortfolioData {
   [category: string]: PortfolioItemData[];
 }
 
-const AUTOBIOGRAPHY_TEXT = `我是一名熱愛 3D技術、虛擬製作與AI創作的3DArtist,致力於不斷提升技能與知識,並在多個專案中累積了寶貴成果,擁有七年豐富經驗。\n\n▶核心技能:涵蓋3DMAX(動畫、建模、VRAY 材質渲染、TyFlow)BLENDER(動畫、建模、GeometryNode)及Substance Painter (PBR 貼圖製作) 。 ,精通 Unreal 引擎的 blueprint 與 Lumen 環境烘焙,能將精緻虛擬場景導入 Virtual Production 虛擬LED 棚進行實務拍攝。\n\n▶專案經驗:為客戶製作擬真 3D家具與組裝動畫,並參與IN3D虛擬購物網站與全國電子虛擬購物網站與AR互動製作,透過Blueprint 大幅提升效率。\n\n▶製片廠經驗:參與電影《老狐狸》虛擬製作,能與導演、攝影師等合作的經驗,使虛擬環境與真實拍攝完美融合。\n\n近年來,我也積極探索 AI 繪圖與影片生成技術,擁有從 Stable Diffusion到 ComfyUI 再到 nano banana 的實戰經驗,並能運用wan2.2、Kling Al等工具進行影片生成。我具備基礎程式能力,並能運用 Google AI Studio、Cursor、Copilot等AI 輔助工具開發 App DEMO,將AI應用於更多元的創作領域。`;
+const AUTOBIOGRAPHY_TEXT = `我是一名熱愛 3D 技術、虛擬製作與 AI 創作的 3D Artist，致力於不斷提升技能與知識，並在多個專案中累積了寶貴成果，擁有七年豐富經驗。
+▶ 核心技能：涵蓋 3DMAX（動畫、建模、VRAY 材質渲染、TyFlow）、BLENDER（動畫、建模、GeometryNode）及 Substance Painter（PBR 貼圖製作）。精通 Unreal 引擎的 blueprint 與 Lumen 環境烘焙，能將精緻虛擬場景導入 Virtual Production 虛擬 LED 棚進行實務拍攝。
+▶ 專案經驗：為客戶製作擬真 3D 家具與組裝動畫，並參與 IN3D 虛擬購物網站與全國電子虛擬購物網站與 AR 互動製作。透過 Blueprint 大幅提升效率。
+▶ 製片廠經驗：參與電影**《老狐狸》虛擬製作**，能與導演、攝影師等合作的經驗，使虛擬環境與真實拍攝完美融合。
+近年來，我也積極探索 AI 繪圖與影片生成技術，擁有從 Stable Diffusion 到 ComfyUI 再到 nano banana 的實戰經驗，並能運用 wan2.2、Kling Al 等工具進行影片生成。我具備基礎程式能力，並能運用 Google AI Studio、Cursor、Copilot 等 AI 輔助工具開發 App DEMO，將 AI 應用於更多元的創作領域。」
+
+--------------------------------------------------------------------------------
+個人履歷與經歷補充資訊
+除了上述自傳內容外，作品集還提供了李承（David）的詳細履歷資訊：
+基本資料
+• 姓名： 李承 (David)
+• 聯絡電話： 0903646800
+• 電子郵件： 40248138@gm.nfu.edu.tw
+• 出生日期： 1994/11/17
+學歷
+• 國立虎尾科技大學：多媒體設計系
+• 台北市大安高工：圖文傳播科
+工作經歷
+• 珠峰數位影像有限公司：擔任 3D 建模/技術美術 (2017.11 至今)
+證照
+• 丙級圖文組版技術士
+• Adobe Certified Associate
+• MOS Microsoft
+得獎經歷
+• Wayfair 3D 建模廠商第一名 (2018)
+• Overstock 3D 建模廠商第一名 (2019)
+`;
 const SEPARATOR = "\n---\n";
 
 const Header = () => {
