@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect, useRef, useCallback } from 'https://aistudiocdn.com/react@^19.2.0';
 import ReactDOM from 'https://aistudiocdn.com/react-dom@^19.2.0/client';
 import { GoogleGenAI } from "https://aistudiocdn.com/@google/genai";
@@ -8,6 +7,13 @@ import { marked } from "https://aistudiocdn.com/marked@^13.0.0";
 declare global {
     interface Window {
         portfolioData: any;
+    }
+    // Add type definition for Vite environment variables
+    interface ImportMetaEnv {
+        readonly VITE_API_KEY: string;
+    }
+    interface ImportMeta {
+        readonly env: ImportMetaEnv;
     }
 }
 
@@ -64,8 +70,6 @@ const DOCUMENT_TEXT = `這是關於一位3D藝術家李承(David)的專業背景
 近年來,我也積極探索 AI 繪圖與影片生成技術,擁有從 Stable Diffusion到 ComfyUI 再到 nano banana 的實戰經驗,並能運用wan2.2、Kling Al等工具進行影片生成。我具備基礎程式能力,並能運用 Google AI Studio、Cursor、Copilot等AI 輔助工具開發 App DEMO,將AI應用於更多元的創作領域。
 ---
 `;
-
-const SEPARATOR = "\n---\n";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -453,7 +457,6 @@ const Footer = () => (
 interface Message {
   role: 'user' | 'assistant';
   content: string;
-  context?: string[];
 }
 
 // --- AI Initialization ---
@@ -461,17 +464,17 @@ let ai: GoogleGenAI | null = null;
 let aiInitializationError: string | null = null;
 
 try {
-  // FIX: Switched to process.env.API_KEY to align with Gemini API guidelines
-  // and resolve environment variable access issues. This also fixes the TypeScript error.
-  const apiKey = process.env.API_KEY;
+  // Access the API key from Vite's environment variables
+  // This is the secure, standard way for Vite projects on Vercel
+  const apiKey = import.meta.env.VITE_API_KEY;
 
   if (!apiKey) {
-    throw new Error("API_KEY environment variable not found.");
+    throw new Error("VITE_API_KEY environment variable not found.");
   }
   ai = new GoogleGenAI({ apiKey });
 } catch (e) {
   console.error("AI Initialization Error:", e);
-  aiInitializationError = "抱歉，AI 助理無法啟動，因為缺少必要的設定。請網站管理員確認 API_KEY 環境變數已設定。";
+  aiInitializationError = "抱歉，AI 助理無法啟動，因為缺少必要的設定。請網站管理員確認 VITE_API_KEY 環境變數已設定。";
 }
 
 
@@ -506,27 +509,18 @@ const ChatWindow: React.FC = () => {
         throw new Error("AI client is not initialized.");
       }
       
-      const retrievalPrompt = `You are a research assistant. From the following document, extract the most relevant sections that can help answer the user's question. The document is in Chinese. Output only the extracted text, separated by '${SEPARATOR}'.\n\nDOCUMENT:\n${DOCUMENT_TEXT}\n\nUSER QUESTION:\n${input}`;
+      const generationPrompt = `You are a helpful chatbot for a portfolio website. Answer the user's question in Traditional Chinese based *only* on the provided document about the 3D artist David Lee. Be concise and clear. If the document is insufficient to answer, politely say you don't have that information.\n\nDOCUMENT:\n${DOCUMENT_TEXT}\n\nUSER QUESTION:\n${input}`;
       
       const model = 'gemini-2.5-flash';
-      const retrieveResponse = await ai.models.generateContent({
-        model,
-        contents: retrievalPrompt,
-      });
-
-      const retrievedContext = retrieveResponse.text.split(SEPARATOR).filter(t => t.trim());
       
-      const generationPrompt = `You are a helpful chatbot. Answer the user's question in Traditional Chinese based *only* on the provided context. Be concise and clear. If the context is insufficient, say you don't know the answer based on the provided text.\n\nCONTEXT:\n${retrievedContext.join('\n\n')}\n\nUSER QUESTION:\n${input}`;
-      
-      const finalResponse = await ai.models.generateContent({
+      const response = await ai.models.generateContent({
         model,
         contents: generationPrompt,
       });
 
       const assistantMessage: Message = {
         role: 'assistant',
-        content: finalResponse.text,
-        context: retrievedContext.length > 0 ? retrievedContext : undefined,
+        content: response.text,
       };
       setMessages(prev => [...prev, assistantMessage]);
 
@@ -558,14 +552,6 @@ const ChatWindow: React.FC = () => {
         {messages.map((msg, index) => (
           <div key={index} className={`message ${msg.role}`}>
             <div className="bubble" dangerouslySetInnerHTML={{ __html: marked.parse(msg.content) }}></div>
-            {msg.role === 'assistant' && msg.context && (
-              <div className="context-section">
-                <h3>Retrieved Context</h3>
-                {msg.context.map((ctx, i) => (
-                  <p key={i} className="context-item">{ctx.trim()}</p>
-                ))}
-              </div>
-            )}
           </div>
         ))}
         {isLoading && (
