@@ -1,7 +1,8 @@
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import ReactDOM from 'react-dom/client';
-import { GoogleGenAI } from "@google/genai";
+
+import React, { useState, useEffect, useRef, useCallback } from 'https://aistudiocdn.com/react@^19.2.0';
+import ReactDOM from 'https://aistudiocdn.com/react-dom@^19.2.0/client';
+import { GoogleGenAI } from "https://aistudiocdn.com/@google/genai";
 import { marked } from "https://aistudiocdn.com/marked@^13.0.0";
 
 declare global {
@@ -430,7 +431,8 @@ const Portfolio = () => {
                 <div key={category} className="portfolio-category">
                     <h3 className="portfolio-category-title">{category}</h3>
                     <div className="portfolio-grid">
-                        {items.map((item: PortfolioItemData) => (
+                        {/* Fix: Added Array.isArray check to ensure 'items' is an array before calling .map(), which also acts as a type guard to resolve the TypeScript error. */}
+                        {Array.isArray(items) && items.map((item: PortfolioItemData) => (
                             <PortfolioItem key={item.id} item={item} onVideoClick={handleVideoClick} />
                         ))}
                     </div>
