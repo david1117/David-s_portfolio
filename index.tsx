@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useCallback } from 'https://aistudiocdn.com/react@^19.2.0';
 import ReactDOM from 'https://aistudiocdn.com/react-dom@^19.2.0/client';
 import { GoogleGenAI } from "https://aistudiocdn.com/@google/genai";
@@ -457,6 +456,7 @@ const Footer = () => (
 interface Message {
   role: 'user' | 'assistant';
   content: string;
+  context?: string;
 }
 
 // --- AI Initialization ---
@@ -509,18 +509,22 @@ const ChatWindow: React.FC = () => {
         throw new Error("AI client is not initialized.");
       }
       
-      const generationPrompt = `You are a helpful chatbot for a portfolio website. Answer the user's question in Traditional Chinese based *only* on the provided document about the 3D artist David Lee. Be concise and clear. If the document is insufficient to answer, politely say you don't have that information.\n\nDOCUMENT:\n${DOCUMENT_TEXT}\n\nUSER QUESTION:\n${input}`;
-      
       const model = 'gemini-2.5-flash';
-      
-      const response = await ai.models.generateContent({
-        model,
-        contents: generationPrompt,
-      });
 
+      // Step 1: Retrieve the most relevant context
+      const retrievalPrompt = `You are a text retrieval expert. Your task is to find the single most relevant sentence or short paragraph from the DOCUMENT provided below that directly answers the USER QUESTION. Output only that exact sentence/paragraph, and nothing else.\n\nDOCUMENT:\n${DOCUMENT_TEXT}\n\nUSER QUESTION: ${input}\n\nRELEVANT EXCERPT:`;
+      const retrievalResponse = await ai.models.generateContent({ model, contents: retrievalPrompt });
+      const retrievedContext = retrievalResponse.text.trim();
+
+      // Step 2: Generate an answer based on the retrieved context
+      const generationPrompt = `You are a helpful chatbot for a portfolio website. Answer the user's question in Traditional Chinese based *only* on the provided CONTEXT. Be concise and clear. If the context is insufficient to answer, politely say you don't have that information.\n\nCONTEXT:\n${retrievedContext}\n\nUSER QUESTION: ${input}\n\nANSWER:`;
+      const generationResponse = await ai.models.generateContent({ model, contents: generationPrompt });
+      const assistantResponse = generationResponse.text;
+      
       const assistantMessage: Message = {
         role: 'assistant',
-        content: response.text,
+        content: assistantResponse,
+        context: retrievedContext,
       };
       setMessages(prev => [...prev, assistantMessage]);
 
@@ -552,6 +556,12 @@ const ChatWindow: React.FC = () => {
         {messages.map((msg, index) => (
           <div key={index} className={`message ${msg.role}`}>
             <div className="bubble" dangerouslySetInnerHTML={{ __html: marked.parse(msg.content) }}></div>
+             {msg.role === 'assistant' && msg.context && (
+              <div className="context-section">
+                <h3>RETRIEVED CONTEXT</h3>
+                <div className="context-item">{msg.context}</div>
+              </div>
+            )}
           </div>
         ))}
         {isLoading && (
