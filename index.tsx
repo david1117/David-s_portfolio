@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import ReactDOM from 'react-dom/client';
-import { GoogleGenAI } from "https://aistudiocdn.com/@google/genai";
+import { GoogleGenAI } from "@google/genai";
 import { marked } from "https://aistudiocdn.com/marked@^13.0.0";
 
 declare global {
@@ -459,6 +460,17 @@ interface Message {
   context?: string[];
 }
 
+let ai: GoogleGenAI | null = null;
+try {
+  // Initialize the GoogleGenAI client once at the module level.
+  // This will throw a ReferenceError if `process` is not defined in the execution
+  // environment, which will be caught and handled in the ChatWindow component.
+  ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+} catch (e) {
+  console.error("AI Initialization Error:", e);
+  // The error will be handled gracefully inside the ChatWindow component.
+}
+
 const ChatWindow: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -486,12 +498,14 @@ const ChatWindow: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      if (!ai) {
+        throw new Error("AI client failed to initialize. Check the browser console for an initialization error.");
+      }
       
       const retrievalPrompt = `You are a research assistant. From the following document, extract the most relevant sections that can help answer the user's question. The document is in Chinese. Output only the extracted text, separated by '${SEPARATOR}'.\n\nDOCUMENT:\n${DOCUMENT_TEXT}\n\nUSER QUESTION:\n${input}`;
       
       const model = 'gemini-2.5-flash';
-      let retrieveResponse = await ai.models.generateContent({
+      const retrieveResponse = await ai.models.generateContent({
         model,
         contents: retrievalPrompt,
       });
@@ -500,7 +514,7 @@ const ChatWindow: React.FC = () => {
       
       const generationPrompt = `You are a helpful chatbot. Answer the user's question in Traditional Chinese based *only* on the provided context. Be concise and clear. If the context is insufficient, say you don't know the answer based on the provided text.\n\nCONTEXT:\n${retrievedContext.join('\n\n')}\n\nUSER QUESTION:\n${input}`;
       
-      let finalResponse = await ai.models.generateContent({
+      const finalResponse = await ai.models.generateContent({
         model,
         contents: generationPrompt,
       });
@@ -513,16 +527,24 @@ const ChatWindow: React.FC = () => {
       setMessages(prev => [...prev, assistantMessage]);
 
     } catch (error) {
-      console.error("Error generating content:", error);
-      let content = "抱歉，我遇到了一些問題，請稍後再試。";
-      if (error instanceof ReferenceError || (error instanceof Error && error.message.includes("API key"))) {
-        content = "抱歉，AI 助理功能目前無法使用。";
-      }
-      const errorMessage: Message = {
-        role: 'assistant',
-        content: content,
-      };
-      setMessages(prev => [...prev, errorMessage]);
+        console.error("Error generating content:", error);
+        let content = "抱歉，我遇到了一些問題，請稍後再試。";
+
+        if (error instanceof ReferenceError) {
+            content = "抱歉，AI 助理環境設定錯誤。請網站管理員檢查設定。";
+        } else if (error instanceof Error) {
+            if (error.message.toLowerCase().includes("api key")) {
+                content = "抱歉，AI 助理 API 金鑰設定錯誤。請網站管理員檢查設定。";
+            } else if (error.message.includes("initialize")) {
+                content = "抱歉，AI 助理初始化失敗，請聯絡管理員。";
+            }
+        }
+
+        const errorMessage: Message = {
+            role: 'assistant',
+            content: content,
+        };
+        setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
