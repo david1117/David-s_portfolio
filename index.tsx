@@ -517,7 +517,19 @@ const ChatWindow: React.FC = () => {
       const retrievedContext = retrievalResponse.text.trim();
 
       // Step 2: Generate an answer based on the retrieved context
-      const generationPrompt = `You are a helpful chatbot for a portfolio website. Answer the user's question in Traditional Chinese based *only* on the provided CONTEXT. Be concise and clear. If the context is insufficient to answer, politely say you don't have that information.\n\nCONTEXT:\n${retrievedContext}\n\nUSER QUESTION: ${input}\n\nANSWER:`;
+      const generationPrompt = `你是3D藝術家李承(David)作品集的專業、禮貌且鼓勵人心的AI助理。你的目標是向潛在的雇主或客戶正面地介紹他。
+- 請使用繁體中文回答。
+- 你的回答必須嚴格基於提供的「參考內文」。
+- 保持溫暖、支持和婉轉客氣的語氣。
+- 當被問及他是否能勝任某個職位時(例如「AI應用工程師」)，請強調「參考內文」中提到的技能如何為該職位奠定堅實的基礎。對他的潛力表示鼓勵。
+- 不要只說「資訊不足」。而是要正面地闡述現有的資訊，並從中做出合理的正面推斷。
+
+參考內文:
+${retrievedContext}
+
+使用者問題: ${input}
+
+助理回答:`;
       const generationResponse = await ai.models.generateContent({ model, contents: generationPrompt });
       const assistantResponse = generationResponse.text;
       
