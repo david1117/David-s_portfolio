@@ -8,11 +8,6 @@ import { marked } from "https://aistudiocdn.com/marked@^13.0.0";
 declare global {
     interface Window {
         portfolioData: any;
-        process: {
-            env: {
-                API_KEY: string;
-            }
-        }
     }
 }
 
@@ -431,7 +426,6 @@ const Portfolio = () => {
                 <div key={category} className="portfolio-category">
                     <h3 className="portfolio-category-title">{category}</h3>
                     <div className="portfolio-grid">
-                        {/* Fix: Added Array.isArray check to ensure 'items' is an array before calling .map(), which also acts as a type guard to resolve the TypeScript error. */}
                         {Array.isArray(items) && items.map((item: PortfolioItemData) => (
                             <PortfolioItem key={item.id} item={item} onVideoClick={handleVideoClick} />
                         ))}
@@ -462,22 +456,30 @@ interface Message {
   context?: string[];
 }
 
+// --- AI Initialization ---
 let ai: GoogleGenAI | null = null;
+let aiInitializationError: string | null = null;
+
 try {
-  // Initialize the GoogleGenAI client once at the module level.
-  // This will throw a ReferenceError if `process` is not defined in the execution
-  // environment, which will be caught and handled in the ChatWindow component.
-  ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  // FIX: Switched to process.env.API_KEY to align with Gemini API guidelines
+  // and resolve environment variable access issues. This also fixes the TypeScript error.
+  const apiKey = process.env.API_KEY;
+
+  if (!apiKey) {
+    throw new Error("API_KEY environment variable not found.");
+  }
+  ai = new GoogleGenAI({ apiKey });
 } catch (e) {
   console.error("AI Initialization Error:", e);
-  // The error will be handled gracefully inside the ChatWindow component.
+  aiInitializationError = "抱歉，AI 助理無法啟動，因為缺少必要的設定。請網站管理員確認 API_KEY 環境變數已設定。";
 }
+
 
 const ChatWindow: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      content: "你好！我可以回答關於這位3D藝術家專業背景的問題。你想知道些什麼？",
+      content: aiInitializationError || "你好！我可以回答關於這位3D藝術家專業背景的問題。你想知道些什麼？",
     }
   ]);
   const [input, setInput] = useState('');
@@ -492,7 +494,7 @@ const ChatWindow: React.FC = () => {
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || isLoading || aiInitializationError) return;
 
     const userMessage: Message = { role: 'user', content: input };
     setMessages(prev => [...prev, userMessage]);
@@ -501,7 +503,7 @@ const ChatWindow: React.FC = () => {
 
     try {
       if (!ai) {
-        throw new Error("AI client failed to initialize. Check the browser console for an initialization error.");
+        throw new Error("AI client is not initialized.");
       }
       
       const retrievalPrompt = `You are a research assistant. From the following document, extract the most relevant sections that can help answer the user's question. The document is in Chinese. Output only the extracted text, separated by '${SEPARATOR}'.\n\nDOCUMENT:\n${DOCUMENT_TEXT}\n\nUSER QUESTION:\n${input}`;
@@ -530,21 +532,9 @@ const ChatWindow: React.FC = () => {
 
     } catch (error) {
         console.error("Error generating content:", error);
-        let content = "抱歉，我遇到了一些問題，請稍後再試。";
-
-        if (error instanceof ReferenceError) {
-            content = "抱歉，AI 助理環境設定錯誤。請網站管理員檢查設定。";
-        } else if (error instanceof Error) {
-            if (error.message.toLowerCase().includes("api key")) {
-                content = "抱歉，AI 助理 API 金鑰設定錯誤。請網站管理員檢查設定。";
-            } else if (error.message.includes("initialize")) {
-                content = "抱歉，AI 助理初始化失敗，請聯絡管理員。";
-            }
-        }
-
         const errorMessage: Message = {
             role: 'assistant',
-            content: content,
+            content: "抱歉，我遇到了一些問題，請稍後再試。",
         };
         setMessages(prev => [...prev, errorMessage]);
     } finally {
@@ -589,11 +579,12 @@ const ChatWindow: React.FC = () => {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleTextareaKey}
-          placeholder="詢問關於此文件內容的問題..."
+          placeholder={aiInitializationError ? "AI 助理無法使用" : "詢問關於此文件內容的問題..."}
           aria-label="Chat input"
           rows={1}
+          disabled={!!aiInitializationError}
         />
-        <button type="submit" disabled={isLoading || !input.trim()} aria-label="Send message">
+        <button type="submit" disabled={isLoading || !input.trim() || !!aiInitializationError} aria-label="Send message">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
         </button>
       </form>
