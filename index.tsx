@@ -482,7 +482,7 @@ const ChatWindow: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      content: aiInitializationError || "你好！我可以回答關於這位3D藝術家專業背景的問題。你想知道些什麼？",
+      content: aiInitializationError || "你好！我可以回答關於李承(David)專業背景的問題。你想知道些什麼？",
     }
   ]);
   const [input, setInput] = useState('');
